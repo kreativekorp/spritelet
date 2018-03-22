@@ -1,0 +1,24 @@
+pcb height
+1.766 in 44.85 mm
+1.77 in 44.96 mm
+1.772 in 45 mm
+
+pcb width
+1.6915 in 42.98 mm
+1.693 in 43 mm
+1.7 in 43.18 mm
+
+left/right/bottom inset
+0.3 in 7.63 mm
+0.315 in 8 mm
+
+top inset
+0.35 in 8.9 mm
+0.3545 in 9 mm
+
+lcd thickness
+0.1075 in 2.74 mm
+0.1 in 2.54 mm
+0.0985 in 2.5 mm
+0.1025 in 2.6 mm
+0.1065 in 2.7 mm
