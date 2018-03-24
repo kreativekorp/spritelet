@@ -1,11 +1,11 @@
 #include <Arduino.h>
-#include <SPI.h>
 #include <avr/pgmspace.h>
 #include <avr/power.h>
 #include "clouds.h"
 #include "picofs_diskio.h"
 #include "picofs_pins.h"
 #include "picofs.h"
+#include "spi.h"
 #include "spritelet_font.h"
 #include "spritelet_input.h"
 #include "spritelet_pins.h"
@@ -57,16 +57,13 @@ void loop(void) {
 }
 
 void lena(void) {
-	uint16_t ptr;
 	if (!fs.open("LENA128.565")) {
 		tft.setRotation(0);
 		tft.setAddrWindow(0, 0, 127, 127);
 		while (!fs.read()) {
 			TFT_DC_PORT |=  TFT_DC_MASK;
 			TFT_CS_PORT &=~ TFT_CS_MASK;
-			for (ptr = 0; ptr < 512; ptr++) {
-				SPI.transfer(fs.buf[ptr]);
-			}
+			SPI.writeBlock(fs.buf, 512);
 			TFT_CS_PORT |=  TFT_CS_MASK;
 		}
 		fs.close();

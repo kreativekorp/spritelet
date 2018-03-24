@@ -5,8 +5,8 @@
 /**************************************************************************/
 
 #include <Arduino.h>
-#include <SPI.h>
 #include <avr/pgmspace.h>
+#include "spi.h"
 #include "st7735_commands.h"
 #include "st7735_config.h"
 #include "st7735_init.h"
@@ -94,33 +94,24 @@ void ST7735::setAddrWindow(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1) {
 void ST7735::pushColor(uint16_t color) {
 	TFT_DC_PORT |=  TFT_DC_MASK;
 	TFT_CS_PORT &=~ TFT_CS_MASK;
-	SPI.transfer(color >> 8);
-	SPI.transfer(color);
+	SPI.write(color >> 8);
+	SPI.write(color);
 	TFT_CS_PORT |=  TFT_CS_MASK;
 }
 
 void ST7735::pushColors(uint16_t * colors, uint16_t off, uint16_t len) {
 	TFT_DC_PORT |=  TFT_DC_MASK;
 	TFT_CS_PORT &=~ TFT_CS_MASK;
-	colors += off;
-	while (len--) {
-		SPI.transfer((*colors) >> 8);
-		SPI.transfer(*colors);
-		colors++;
-	}
+	SPI.writeBlock16(colors + off, len);
 	TFT_CS_PORT |=  TFT_CS_MASK;
 }
 
 void ST7735::fillScreen(uint16_t color) {
 	uint16_t n = width; n *= height;
-	uint8_t hi = (color >> 8), lo = color;
 	setAddrWindow(0, 0, width - 1, height - 1);
 	TFT_DC_PORT |=  TFT_DC_MASK;
 	TFT_CS_PORT &=~ TFT_CS_MASK;
-	while (n--) {
-		SPI.transfer(hi);
-		SPI.transfer(lo);
-	}
+	SPI.writeRep16(color >> 8, color, n);
 	TFT_CS_PORT |=  TFT_CS_MASK;
 }
 
@@ -129,8 +120,8 @@ void ST7735::drawPixel(int16_t x, int16_t y, uint16_t color) {
 		setAddrWindow(x, y, x, y);
 		TFT_DC_PORT |=  TFT_DC_MASK;
 		TFT_CS_PORT &=~ TFT_CS_MASK;
-		SPI.transfer(color >> 8);
-		SPI.transfer(color);
+		SPI.write(color >> 8);
+		SPI.write(color);
 		TFT_CS_PORT |=  TFT_CS_MASK;
 	}
 }
@@ -140,14 +131,10 @@ void ST7735::drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color) {
 		if (y < 0) { h += y; y = 0; }
 		if ((y + h - 1) >= height) h = height - y;
 		if (h > 0) {
-			uint8_t hi = (color >> 8), lo = color;
 			setAddrWindow(x, y, x, y + h - 1);
 			TFT_DC_PORT |=  TFT_DC_MASK;
 			TFT_CS_PORT &=~ TFT_CS_MASK;
-			while (h--) {
-				SPI.transfer(hi);
-				SPI.transfer(lo);
-			}
+			SPI.writeRep16(color >> 8, color, h);
 			TFT_CS_PORT |=  TFT_CS_MASK;
 		}
 	}
@@ -158,14 +145,10 @@ void ST7735::drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color) {
 		if (x < 0) { w += x; x = 0; }
 		if ((x + w - 1) >= width) w = width - x;
 		if (w > 0) {
-			uint8_t hi = (color >> 8), lo = color;
 			setAddrWindow(x, y, x + w - 1, y);
 			TFT_DC_PORT |=  TFT_DC_MASK;
 			TFT_CS_PORT &=~ TFT_CS_MASK;
-			while (w--) {
-				SPI.transfer(hi);
-				SPI.transfer(lo);
-			}
+			SPI.writeRep16(color >> 8, color, w);
 			TFT_CS_PORT |=  TFT_CS_MASK;
 		}
 	}
@@ -178,14 +161,10 @@ void ST7735::fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color
 	if ((y + h - 1) >= height) h = height - y;
 	if (w > 0 && h > 0) {
 		uint16_t n = w; n *= h;
-		uint8_t hi = (color >> 8), lo = color;
 		setAddrWindow(x, y, x + w - 1, y + h - 1);
 		TFT_DC_PORT |=  TFT_DC_MASK;
 		TFT_CS_PORT &=~ TFT_CS_MASK;
-		while (n--) {
-			SPI.transfer(hi);
-			SPI.transfer(lo);
-		}
+		SPI.writeRep16(color >> 8, color, n);
 		TFT_CS_PORT |=  TFT_CS_MASK;
 	}
 }
@@ -198,14 +177,14 @@ void ST7735::setBacklight(boolean lite) {
 void ST7735::writeCommand(uint8_t c) {
 	TFT_DC_PORT &=~ TFT_DC_MASK;
 	TFT_CS_PORT &=~ TFT_CS_MASK;
-	SPI.transfer(c);
+	SPI.write(c);
 	TFT_CS_PORT |=  TFT_CS_MASK;
 }
 
 void ST7735::writeData(uint8_t d) {
 	TFT_DC_PORT |=  TFT_DC_MASK;
 	TFT_CS_PORT &=~ TFT_CS_MASK;
-	SPI.transfer(d);
+	SPI.write(d);
 	TFT_CS_PORT |=  TFT_CS_MASK;
 }
 

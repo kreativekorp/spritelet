@@ -1,7 +1,7 @@
 #include <Arduino.h>
-#include <SPI.h>
 #include <avr/pgmspace.h>
 #include "clouds.h"
+#include "spi.h"
 #include "st7735_pins.h"
 #include "st7735.h"
 
@@ -51,8 +51,8 @@ static int16_t blit(const uint8_t * ptr, int16_t y, uint8_t h) {
 		}
 		uint16_t n = h * 24;
 		while (n--) {
-			SPI.transfer(pgm_read_byte(ptr++));
-			SPI.transfer(pgm_read_byte(ptr++));
+			SPI.write(pgm_read_byte(ptr++));
+			SPI.write(pgm_read_byte(ptr++));
 		}
 	}
 	return r;

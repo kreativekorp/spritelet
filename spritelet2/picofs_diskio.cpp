@@ -4,9 +4,9 @@
  **********************************************************/
 
 #include <Arduino.h>
-#include <SPI.h>
 #include "picofs_diskio.h"
 #include "picofs_pins.h"
+#include "spi.h"
 
 #define CMD0   0x40
 #define CMD1   0x41
@@ -25,14 +25,14 @@ static uint8_t send_cmd(uint8_t cmd, uint32_t arg) {
 		if (res > 1) return res;
 		cmd &= 0x7F;
 	}
-	SPI.transfer(0xFF);
-	SPI.transfer(cmd);
-	SPI.transfer(arg >> 24);
-	SPI.transfer(arg >> 16);
-	SPI.transfer(arg >> 8);
-	SPI.transfer(arg);
-	SPI.transfer((cmd == CMD0) ? 0x95 : (cmd == CMD8) ? 0x87 : 0x01);
-	for (i = 0; ((res = SPI.transfer(0xFF)) & 0x80) && i < 10; i++);
+	SPI.write(0xFF);
+	SPI.write(cmd);
+	SPI.write(arg >> 24);
+	SPI.write(arg >> 16);
+	SPI.write(arg >> 8);
+	SPI.write(arg);
+	SPI.write((cmd == CMD0) ? 0x95 : (cmd == CMD8) ? 0x87 : 0x01);
+	for (i = 0; ((res = SPI.read()) & 0x80) && i < 10; i++);
 	return res;
 }
 
@@ -43,11 +43,11 @@ uint8_t disk_initialize(void) {
 	uint16_t wait;
 	card_type = 0;
 	SD_CS_PORT |= SD_CS_MASK;
-	for (i = 0; i < 10; i++) SPI.transfer(0xFF);
+	for (i = 0; i < 10; i++) SPI.skip();
 	SD_CS_PORT &=~ SD_CS_MASK;
 	if (send_cmd(CMD0, 0) == 1) {
 		if (send_cmd(CMD8, 0x1AA) == 1) {
-			for (i = 0; i < 4; i++) ocr[i] = SPI.transfer(0xFF);
+			for (i = 0; i < 4; i++) ocr[i] = SPI.read();
 			if (ocr[2] == 0x01 && ocr[3] == 0xAA) {
 				wait = 10000;
 				while (wait && send_cmd(ACMD41, 0x40000000)) {
@@ -55,7 +55,7 @@ uint8_t disk_initialize(void) {
 					wait--;
 				}
 				if (wait && !send_cmd(CMD58, 0)) {
-					for (i = 0; i < 4; i++) ocr[i] = SPI.transfer(0xFF);
+					for (i = 0; i < 4; i++) ocr[i] = SPI.read();
 					card_type = (ocr[0] & 0x40) ? (CT_SD2 | CT_BLOCK) : CT_SD2;
 				}
 			}
@@ -83,16 +83,16 @@ uint8_t disk_initialize(void) {
 
 uint8_t disk_read(uint8_t * buf, uint32_t sector) {
 	uint8_t res, rc;
-	uint16_t wait, bc;
+	uint16_t wait;
 	res = RES_ERROR;
 	if (!(card_type & CT_BLOCK)) sector <<= 9;
 	SD_CS_PORT &=~ SD_CS_MASK;
 	if (!send_cmd(CMD17, sector)) {
-		for (wait = 40000; ((rc = SPI.transfer(0xFF)) == 0xFF) && wait; wait--);
+		for (wait = 40000; ((rc = SPI.read()) == 0xFF) && wait; wait--);
 		if (rc == 0xFE) {
-			for (bc = 0; bc < 512; bc++) *buf++ = SPI.transfer(0xFF);
-			SPI.transfer(0xFF);
-			SPI.transfer(0xFF);
+			SPI.readBlock(buf, 512);
+			SPI.skip();
+			SPI.skip();
 			res = RES_OK;
 		}
 	}
@@ -102,19 +102,19 @@ uint8_t disk_read(uint8_t * buf, uint32_t sector) {
 
 uint8_t disk_write(uint8_t * buf, uint32_t sector) {
 	uint8_t res;
-	uint16_t wait, bc;
+	uint16_t wait;
 	res = RES_ERROR;
 	if (!(card_type & CT_BLOCK)) sector <<= 9;
 	SD_CS_PORT &=~ SD_CS_MASK;
 	if (!send_cmd(CMD24, sector)) {
-		SPI.transfer(0xFF);
-		SPI.transfer(0xFE);
-		for (bc = 0; bc < 512; bc++) SPI.transfer(*buf++);
-		SPI.transfer(0);
-		SPI.transfer(0);
-		if ((SPI.transfer(0xFF) & 0x1F) == 0x05) {
+		SPI.write(0xFF);
+		SPI.write(0xFE);
+		SPI.writeBlock(buf, 512);
+		SPI.write(0);
+		SPI.write(0);
+		if ((SPI.read() & 0x1F) == 0x05) {
 			wait = 5000;
-			while (wait && (SPI.transfer(0xFF) != 0xFF)) {
+			while (wait && (SPI.read() != 0xFF)) {
 				delayMicroseconds(100);
 				wait--;
 			}

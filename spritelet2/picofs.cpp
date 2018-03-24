@@ -4,10 +4,10 @@
  **********************************************************/
 
 #include <Arduino.h>
-#include <SPI.h>
 #include "picofs_diskio.h"
 #include "picofs_pins.h"
 #include "picofs.h"
+#include "spi.h"
 
 #define UINT16(x) ((uint16_t)( *( (uint16_t *)(uint8_t *)(&(x)) ) ))
 #define UINT32(x) ((uint32_t)( *( (uint32_t *)(uint8_t *)(&(x)) ) ))

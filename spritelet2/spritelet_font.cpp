@@ -1,6 +1,6 @@
 #include <Arduino.h>
-#include <SPI.h>
 #include <avr/pgmspace.h>
+#include "spi.h"
 #include "spritelet_font.h"
 #include "st7735_pins.h"
 #include "st7735.h"
@@ -32,13 +32,13 @@ void tft_drawChar(int16_t x, int16_t y, unsigned char ch, uint16_t bg, uint16_t 
 						if (bg == fg) {
 							tft.drawPixel(x, y, fg);
 						} else {
-							SPI.transfer(fh);
-							SPI.transfer(fl);
+							SPI.write(fh);
+							SPI.write(fl);
 						}
 					} else {
 						if (bg != fg) {
-							SPI.transfer(bh);
-							SPI.transfer(bl);
+							SPI.write(bh);
+							SPI.write(bl);
 						}
 					}
 				}
