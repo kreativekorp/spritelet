@@ -11,6 +11,8 @@
 
 class ST7735 {
 	public:
+		uint8_t width, height;
+
 		uint16_t Color565(uint8_t r, uint8_t g, uint8_t b);
 
 		void init(boolean startSPI);
@@ -28,7 +30,7 @@ class ST7735 {
 		void setBacklight(boolean lite);
 
 	private:
-		uint8_t xstart, ystart, width, height;
+		uint8_t xstart, ystart;
 
 		void writeCommand(uint8_t c);
 		void writeData(uint8_t d);

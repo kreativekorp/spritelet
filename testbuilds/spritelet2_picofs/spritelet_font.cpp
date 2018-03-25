@@ -8,15 +8,15 @@
 extern ST7735 tft;
 
 void tft_drawChar(int16_t x, int16_t y, unsigned char ch, uint16_t bg, uint16_t fg) {
-	if (x > (-BUILTIN_FONT_WIDTH) && x < 128 && y > (-BUILTIN_FONT_HEIGHT) && y < 128) {
+	if (x > (-BUILTIN_FONT_WIDTH) && x < tft.width && y > (-BUILTIN_FONT_HEIGHT) && y < tft.height) {
 		uint8_t bh = (bg >> 8), bl = bg, fh = (fg >> 8), fl = fg;
 		uint8_t cr, cc, cb, cp = 0, cm = 0;
 		if (bg != fg) {
 			tft.setAddrWindow(
 				((x > 0) ? x : 0),
 				((y > 0) ? y : 0),
-				(((x + BUILTIN_FONT_WIDTH) < 128) ? (x + BUILTIN_FONT_WIDTH - 1) : 127),
-				(((y + BUILTIN_FONT_HEIGHT) < 128) ? (y + BUILTIN_FONT_HEIGHT - 1) : 127)
+				(((x + BUILTIN_FONT_WIDTH) < tft.width) ? (x + BUILTIN_FONT_WIDTH - 1) : (tft.width - 1)),
+				(((y + BUILTIN_FONT_HEIGHT) < tft.height) ? (y + BUILTIN_FONT_HEIGHT - 1) : (tft.height - 1))
 			);
 			TFT_DC_PORT |=  TFT_DC_MASK;
 			TFT_CS_PORT &=~ TFT_CS_MASK;
@@ -27,7 +27,7 @@ void tft_drawChar(int16_t x, int16_t y, unsigned char ch, uint16_t bg, uint16_t 
 					cb = pgm_read_byte(&builtin_font[ch][cp++]);
 					cm = 0x80;
 				}
-				if (x >= 0 && x < 128 && y >= 0 && y < 128) {
+				if (x >= 0 && x < tft.width && y >= 0 && y < tft.height) {
 					if (cb & cm) {
 						if (bg == fg) {
 							tft.drawPixel(x, y, fg);
