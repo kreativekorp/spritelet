@@ -6,6 +6,7 @@
 #include "picofs_pins.h"
 #include "picofs.h"
 #include "spi.h"
+#include "spritelet_bitmap.h"
 #include "spritelet_font.h"
 #include "spritelet_input.h"
 #include "spritelet_pins.h"
@@ -57,18 +58,10 @@ void loop(void) {
 }
 
 void lena(void) {
-	if (!fs.open("LENA128.565")) {
-		tft.setRotation(0);
-		tft.setAddrWindow(0, 0, 127, 127);
-		while (!fs.read()) {
-			TFT_DC_PORT |=  TFT_DC_MASK;
-			TFT_CS_PORT &=~ TFT_CS_MASK;
-			SPI.writeBlock(fs.buf, 512);
-			TFT_CS_PORT |=  TFT_CS_MASK;
-		}
-		fs.close();
-		while (!input_get());
-		delay(200);
-		while (input_get());
-	}
+	uint8_t res;
+	tft.setRotation(0);
+	res = tft_drawSMF("LENA128.SMF");
+	while (!res) res = input_get();
+	delay(200);
+	while (input_get());
 }
