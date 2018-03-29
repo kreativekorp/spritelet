@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <avr/pgmspace.h>
 #include <avr/power.h>
+#include "carousel.h"
 #include "clouds.h"
 #include "picofs_diskio.h"
 #include "picofs_pins.h"
@@ -35,7 +36,7 @@ void setup(void) {
 	fs.init(false);
 	if (fs.mount()) {
 		tft_drawString(25, 52, "Please insert", 0, -1);
-		tft_drawString(25, 64, "microSD card.", 0, -1);
+		tft_drawString(25, 64, "MicroSD card.", 0, -1);
 		do { delay(500); } while (fs.mount());
 		tft.fillScreen(0);
 	}
@@ -48,25 +49,14 @@ void loop(void) {
 	clouds_loop();
 	do {
 		switch (input_get()) {
-			case INPUT_UP: delay(200); while (input_get()); tft.setRotation(3); tft.fillScreen(0x6C3F); break;
-			case INPUT_DN: delay(200); while (input_get()); tft.setRotation(1); tft.fillScreen(0x6C3F); break;
-			case INPUT_LT: delay(200); while (input_get()); tft.setRotation(2); tft.fillScreen(0x6C3F); break;
-			case INPUT_RT: delay(200); while (input_get()); tft.setRotation(0); tft.fillScreen(0x6C3F); break;
-			case INPUT_CTR: delay(200); while (input_get()); lena(); clouds_setup(); break;
+			case INPUT_UP: delay(50); while (input_get()); delay(50); tft.setRotation(3); tft.fillScreen(0x6C3F); break;
+			case INPUT_DN: delay(50); while (input_get()); delay(50); tft.setRotation(1); tft.fillScreen(0x6C3F); break;
+			case INPUT_LT: delay(50); while (input_get()); delay(50); tft.setRotation(2); tft.fillScreen(0x6C3F); break;
+			case INPUT_RT: delay(50); while (input_get()); delay(50); tft.setRotation(0); tft.fillScreen(0x6C3F); break;
+			case INPUT_CTR:
+				delay(50); while (input_get()); delay(50); tft.setRotation(0);
+				if (carousel_setup()) while (carousel_loop()); clouds_setup();
+				break;
 		}
 	} while (millis() - t < 30);
-}
-
-uint8_t lena_input(void) {
-	return input_get() & ~INPUT_VS;
-}
-
-void lena(void) {
-	uint8_t res;
-	tft.setRotation(0);
-	res = tft_drawSMF("NETSCAPE.SMF", lena_input);
-	while (!res) res = lena_input();
-	delay(50);
-	while (input_get());
-	delay(50);
 }
