@@ -1,0 +1,43 @@
+*Pick And Place List
+*Company=
+*Author=
+*eMail=
+*
+*Project=spritelet2-teensy
+*Date=17:05:21
+*CreatedBy=Fritzing 0.9.2b.11.19.8d2d5970658f0bed09c661c9ea9a515b5f40f44c
+*
+*
+*Coordinates in mm, always center of component
+*Origin 0/0=Lower left corner of PCB
+*Rotation in degree (0-360, math. pos.)
+*
+*No;Value;Package;X;Y;Rotation;Side;Name
+1;;THT;16.521;-8.89028;0;Bottom;UP
+2;;THT;16.521;-2.54226;0;Bottom;DN
+3;;;35.3483;-7.87189;0;Bottom;TXT4
+4;;THT;21.5869;-37.5802;90;Bottom;J6
+5;;THT;21.59;-12.7;-90;Bottom;POWER
+6;;;10.1008;-7.7838;0;Bottom;IMG2
+7;;THT;26.6724;-5.09101;0;Bottom;LT
+8;;;6.32984;-40.089;0;Bottom;Via1
+9;;;30.3043;-33.2859;90;Bottom;TXT5
+10;;;35.3542;-12.4498;0;Bottom;TXT4
+11;;;35.9164;-29.9786;-90;Bottom;TXT1
+12;;THT;26.6724;-2.55129;0;Bottom;CM
+13;;THT;16.5021;-5.07605;0;Bottom;RT
+14;;;8.9024;-12.605;0;Bottom;IMG1
+15;;THT;21.5869;-22.3615;90;Bottom;J7
+16;;;17.6167;-33.2992;90;Bottom;TXT5
+17;;THT;26.6681;-8.89028;0;Bottom;CT
+18;;THT;20.32;-17.7922;0;Bottom;VS
+19;;;21.562;-29.3412;0;Bottom;TXT3
+20;;;21.5551;-29.3558;0;Bottom;TXT3
+21;;THT;21.5788;-42.5349;-90;Bottom;J1
+22;;THT;30.48;-14.7441;-90;Bottom;J4
+23;;;7.21706;-29.967;90;Bottom;TXT2
+24;;;35.3601;-9.40069;0;Bottom;TXT4
+25;;;35.3483;-13.9936;0;Bottom;TXT4
+26;;;35.3483;-10.9295;0;Bottom;TXT4
+27;;THT;29.21;-9.64607;180;Bottom;J5
+28;;;10.1219;-3.0721;0;Bottom;IMG1
