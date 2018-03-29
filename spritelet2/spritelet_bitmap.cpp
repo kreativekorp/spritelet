@@ -2,14 +2,13 @@
 #include "picofs.h"
 #include "spi.h"
 #include "spritelet_bitmap.h"
-#include "spritelet_input.h"
 #include "st7735_pins.h"
 #include "st7735.h"
 
 extern ST7735 tft;
 extern FATFS fs;
 
-uint8_t tft_drawSMF(char * path) {
+uint8_t tft_drawSMF(char * path, uint8_t (*callback)(void)) {
 	uint32_t time = millis();
 	int16_t bx = 0, by = 0;
 	int16_t x, y, w, h;
@@ -63,8 +62,7 @@ uint8_t tft_drawSMF(char * path) {
 			} else if (cmd == 'W') {
 				n = fs.buf[ptr++];
 				do {
-					cmd = input_get();
-					if (cmd &~ INPUT_VS) {
+					if (callback && (cmd = callback())) {
 						fs.close();
 						return cmd;
 					}
@@ -75,8 +73,7 @@ uint8_t tft_drawSMF(char * path) {
 				n <<= 8;
 				n  |= fs.buf[ptr++];
 				do {
-					cmd = input_get();
-					if (cmd &~ INPUT_VS) {
+					if (callback && (cmd = callback())) {
 						fs.close();
 						return cmd;
 					}

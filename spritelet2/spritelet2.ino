@@ -57,11 +57,16 @@ void loop(void) {
 	} while (millis() - t < 30);
 }
 
+uint8_t lena_input(void) {
+	return input_get() & ~INPUT_VS;
+}
+
 void lena(void) {
 	uint8_t res;
 	tft.setRotation(0);
-	res = tft_drawSMF("LENA128.SMF");
-	while (!res) res = input_get();
-	delay(200);
+	res = tft_drawSMF("NETSCAPE.SMF", lena_input);
+	while (!res) res = lena_input();
+	delay(50);
 	while (input_get());
+	delay(50);
 }

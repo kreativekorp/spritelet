@@ -6,6 +6,6 @@
 #define SMF_OK    0x00
 #define SMF_ERROR 0xFF
 
-uint8_t tft_drawSMF(char * path);
+uint8_t tft_drawSMF(char * path, uint8_t (*callback)(void));
 
 #endif
