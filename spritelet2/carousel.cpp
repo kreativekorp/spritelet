@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <avr/pgmspace.h>
 #include "carousel.h"
 #include "picofs.h"
 #include "spritelet_bitmap.h"
@@ -16,6 +17,12 @@ static uint16_t menu_sector;
 static uint16_t advmenu_start;
 static uint16_t advmenu_index;
 static uint32_t advmenu_timer;
+
+static const char * PROGMEM menu_items[] = { "Cycle Through", "Randomize", "Home" };
+static const char * PROGMEM advmenu_title = "Set Time Delay";
+static const char * PROGMEM advmenu_cancel = "Cancel";
+static const char * PROGMEM toc_path = "SPRITES/SPRITES.STC";
+static const char * PROGMEM toc_not_found[] = { "Could not find", "SPRITES folder." };
 
 static void render_menu(uint8_t mask) {
 	uint8_t m; uint16_t y, i, clr, ptr, sect;
@@ -35,10 +42,8 @@ static void render_menu(uint8_t mask) {
 				sect = ((i + 1) >> 3);
 				if (menu_sector != sect) { fs.seek(menu_sector = sect); fs.read(); }
 				tft_drawString(4, y + 2, (char *)(fs.buf + ptr), clr, 0xFFFF);
-			} else switch (i - menu_count) {
-				case 0: tft_drawString(4, y + 2, "Cycle Through", clr, 0xFFFF); break;
-				case 1: tft_drawString(4, y + 2, "Randomize", clr, 0xFFFF); break;
-				case 2: tft_drawString(4, y + 2, "Home", clr, 0xFFFF); break;
+			} else if ((ptr = i - menu_count) < 3) {
+				tft_drawString(4, y + 2, (char *)menu_items[ptr], clr, 0xFFFF);
 			}
 		}
 	}
@@ -49,7 +54,7 @@ static void render_advtime_menu(uint8_t mask) {
 	// Draw Header
 	if (mask & 0x80) {
 		tft.fillRect(0, 0, 128, 16, 0x000F);
-		tft_drawString(4, 2, "Set Time Delay", 0x000F, 0xFFFF);
+		tft_drawString(4, 2, (char *)advmenu_title, 0x000F, 0xFFFF);
 	}
 	// Draw Menu Items
 	for (m = 0x40, y = 16, i = advmenu_start; m; m >>= 1, y += 16, i++) {
@@ -57,7 +62,7 @@ static void render_advtime_menu(uint8_t mask) {
 			clr = ((i == advmenu_index) ? 0xC000 : 0x0000);
 			tft.fillRect(0, y, 128, 16, clr);
 			if (i == 0) {
-				tft_drawString(4, y + 2, "Cancel", clr, 0xFFFF);
+				tft_drawString(4, y + 2, (char *)advmenu_cancel, clr, 0xFFFF);
 			} else if (i <= 12) {
 				char str[4];
 				uint16_t secs = i * 5;
@@ -245,17 +250,17 @@ static uint8_t render_video(uint16_t i) {
 	tft.fillScreen(0);
 	
 	// reopen menu
-	fs.open("SPRITES/SPRITES.STC");
+	fs.open((char *)toc_path);
 	fs.read();
 	menu_sector = 0;
 	return res;
 }
 
 uint8_t carousel_setup(void) {
-	if (fs.open("SPRITES/SPRITES.STC") || fs.read()) {
+	if (fs.open((char *)toc_path) || fs.read()) {
 		tft.fillScreen(0);
-		tft_drawString(20, 52, "Could not find", 0, -1);
-		tft_drawString(20, 64, "SPRITES folder.", 0, -1);
+		tft_drawString(20, 52, (char *)toc_not_found[0], 0, -1);
+		tft_drawString(20, 64, (char *)toc_not_found[1], 0, -1);
 		while (!input_get());
 		delay(50);
 		while (input_get());
