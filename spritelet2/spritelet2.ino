@@ -3,6 +3,7 @@
 #include <avr/power.h>
 #include "carousel.h"
 #include "clouds.h"
+#include "dx.h"
 #include "picofs_diskio.h"
 #include "picofs_pins.h"
 #include "picofs.h"
@@ -50,12 +51,16 @@ void loop(void) {
 	do {
 		switch (input_get()) {
 			case INPUT_UP: delay(50); while (input_get()); delay(50); tft.setRotation(3); tft.fillScreen(0x6C3F); break;
-			case INPUT_DN: delay(50); while (input_get()); delay(50); tft.setRotation(1); tft.fillScreen(0x6C3F); break;
+			//case INPUT_DN: delay(50); while (input_get()); delay(50); tft.setRotation(1); tft.fillScreen(0x6C3F); break;
 			case INPUT_LT: delay(50); while (input_get()); delay(50); tft.setRotation(2); tft.fillScreen(0x6C3F); break;
 			case INPUT_RT: delay(50); while (input_get()); delay(50); tft.setRotation(0); tft.fillScreen(0x6C3F); break;
 			case INPUT_CTR:
 				delay(50); while (input_get()); delay(50); tft.setRotation(0);
 				if (carousel_setup()) while (carousel_loop()); clouds_setup();
+				break;
+			case INPUT_DN:
+				delay(50); while (input_get()); delay(50); tft.setRotation(0);
+				if (dx_setup()) while (dx_loop()); clouds_setup();
 				break;
 		}
 	} while (millis() - t < 30);
