@@ -78,27 +78,37 @@ uint32_t FATFS::get_fat(uint32_t cluster) {
 		case FS_FAT12:
 			{
 				uint16_t wc, bc, ofs;
+				uint32_t sector;
 				bc = cluster + (cluster >> 1);
 				ofs = bc & 0x1FF; bc >>= 9;
 				if (ofs == 511) {
-					if (disk_read(buf, fat_sector + bc + 1)) return 0;
+					sector = fat_sector + bc + 1;
+					if ((sector != last_fat_sector) && disk_read(buf, last_fat_sector = sector)) return 0;
 					wc = buf[0]; wc <<= 8;
-					if (disk_read(buf, fat_sector + bc)) return 0;
+					last_fat_sector--;
+					if (disk_read(buf, last_fat_sector)) return 0;
 					wc |= buf[511];
 				} else {
-					if (disk_read(buf, fat_sector + bc)) return 0;
+					sector = fat_sector + bc;
+					if ((sector != last_fat_sector) && disk_read(buf, last_fat_sector = sector)) return 0;
 					wc = UINT16(buf[ofs]);
 				}
 				cluster = (cluster & 1) ? (wc >> 4) : (wc & 0xFFF);
 			}
 			break;
 		case FS_FAT16:
-			if (disk_read(buf, fat_sector + (cluster >> 8))) return 0;
-			cluster = UINT16(buf[(cluster & 0xFF) << 1]);
+			{
+				uint32_t sector = fat_sector + (cluster >> 8);
+				if ((sector != last_fat_sector) && disk_read(buf, last_fat_sector = sector)) return 0;
+				cluster = UINT16(buf[(cluster & 0xFF) << 1]);
+			}
 			break;
 		case FS_FAT32:
-			if (disk_read(buf, fat_sector + (cluster >> 7))) return 0;
-			cluster = UINT32(buf[(cluster & 0x7F) << 2]) & 0x0FFFFFFF;
+			{
+				uint32_t sector = fat_sector + (cluster >> 7);
+				if ((sector != last_fat_sector) && disk_read(buf, last_fat_sector = sector)) return 0;
+				cluster = UINT32(buf[(cluster & 0x7F) << 2]) & 0x0FFFFFFF;
+			}
 			break;
 	}
 	if (cluster < 2 || cluster >= num_clusters) return 0;
@@ -121,6 +131,7 @@ void FATFS::advance_fat(void) {
 	} else {
 		// file / subdirectory
 		if (curr_sector >= cluster_size) {
+			last_fat_sector = 0;
 			curr_cluster = get_fat(curr_cluster);
 			curr_sector = 0;
 		}
@@ -204,9 +215,14 @@ uint8_t FATFS::seek(uint32_t sector) {
 		}
 	} else {
 		// file / subdirectory
+		uint8_t cs = cluster_size - 1;
+		last_fat_sector = 0;
 		curr_cluster = start_cluster;
-		curr_sector = sector % cluster_size;
-		sector /= cluster_size;
+		curr_sector = sector & cs;
+		while (cs) {
+			sector >>= 1;
+			cs >>= 1;
+		}
 		while (sector) {
 			curr_cluster = get_fat(curr_cluster);
 			sector--;

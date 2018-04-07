@@ -50,6 +50,7 @@ class FATFS {
 		uint32_t fat_sector;
 		uint32_t root_sector;
 		uint32_t data_sector;
+		uint32_t last_fat_sector;
 		uint32_t file_size;
 		uint32_t start_cluster;
 		uint32_t curr_cluster;
