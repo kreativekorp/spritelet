@@ -40,6 +40,7 @@ class FATFS {
 		uint8_t seek(uint32_t sector);
 		uint8_t read(void);
 		uint8_t write(void);
+		uint8_t frags(uint32_t * offsets, uint32_t * lengths, uint8_t max);
 		void close(void);
 
 	private:
@@ -50,6 +51,7 @@ class FATFS {
 		uint32_t fat_sector;
 		uint32_t root_sector;
 		uint32_t data_sector;
+		uint32_t last_fat_sector;
 		uint32_t file_size;
 		uint32_t start_cluster;
 		uint32_t curr_cluster;

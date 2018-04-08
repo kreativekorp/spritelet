@@ -251,6 +251,46 @@ uint8_t FATFS::write(void) {
 	return FR_OK;
 }
 
+uint8_t FATFS::frags(uint32_t * offsets, uint32_t * lengths, uint8_t max) {
+	if (!start_cluster) return 0;
+	if (start_cluster == 1) {
+		// root directory (FAT12/FAT16)
+		offsets[0] = root_sector;
+		lengths[0] = data_sector - root_sector;
+		return 1;
+	} else {
+		// file / subdirectory
+		uint32_t next_cluster;
+		uint8_t ptr;
+		last_fat_sector = 0;
+		curr_cluster = start_cluster;
+		curr_sector = 0;
+		offsets[0] = get_sector();
+		lengths[0] = cluster_size;
+		ptr = 0;
+		for (;;) {
+			next_cluster = get_fat(curr_cluster);
+			if (!next_cluster) {
+				curr_cluster = 0;
+				return ptr + 1;
+			} else if (next_cluster == curr_cluster + 1) {
+				curr_cluster = next_cluster;
+				lengths[ptr] += cluster_size;
+			} else {
+				ptr++;
+				if (ptr < max) {
+					curr_cluster = next_cluster;
+					offsets[ptr] = get_sector();
+					lengths[ptr] = cluster_size;
+				} else {
+					curr_cluster = 0;
+					return -1;
+				}
+			}
+		}
+	}
+}
+
 void FATFS::close(void) {
 	file_size = 0;
 	start_cluster = 0;
