@@ -115,9 +115,46 @@ uint32_t FATFS::get_fat(uint32_t cluster) {
 	return cluster;
 }
 
-uint32_t FATFS::get_sector(void) {
-	if (curr_cluster == 1) return root_sector + curr_sector;
-	return data_sector + ((curr_cluster - 2) * cluster_size) + curr_sector;
+uint8_t FATFS::get_fragments(void) {
+	if (start_cluster == 1) {
+		// root directory (FAT12/FAT16)
+		frag_offsets[0] = root_sector;
+		frag_lengths[0] = data_sector - root_sector;
+		num_fragments = 1;
+	} else {
+		// file / subdirectory
+		uint32_t next_cluster;
+		uint8_t ptr;
+		last_fat_sector = 0;
+		curr_cluster = start_cluster;
+		frag_offsets[0] = data_sector + ((curr_cluster - 2) * cluster_size);
+		frag_lengths[0] = cluster_size;
+		ptr = 0;
+		for (;;) {
+			next_cluster = get_fat(curr_cluster);
+			if (!next_cluster) {
+				num_fragments = ptr + 1;
+				break;
+			} else if (next_cluster == curr_cluster + 1) {
+				curr_cluster = next_cluster;
+				frag_lengths[ptr] += cluster_size;
+			} else {
+				ptr++;
+				if (ptr < MAX_FRAGMENTS) {
+					curr_cluster = next_cluster;
+					frag_offsets[ptr] = data_sector + ((curr_cluster - 2) * cluster_size);
+					frag_lengths[ptr] = cluster_size;
+				} else {
+					num_fragments = -1;
+					return FR_FRAGMENTED;
+				}
+			}
+		}
+	}
+	curr_cluster = 0;
+	curr_sector = 0;
+	curr_fragment = 0;
+	return FR_OK;
 }
 
 char * FATFS::next_name(char * path, char * name) {
@@ -172,14 +209,10 @@ uint8_t FATFS::open(char * path) {
 	char name[12];
 	file_size = 0;
 	start_cluster = (num_root_files ? 1 : root_sector);
-	num_fragments = frags(frag_offsets, frag_lengths, MAX_FRAGMENTS);
-	if (num_fragments > MAX_FRAGMENTS) { close(); return FR_FRAGMENTED; }
-	curr_fragment = 0;
+	if (get_fragments()) { close(); return FR_FRAGMENTED; }
 	while ((path = next_name(path, name))) {
 		if (find_name(name)) { close(); return FR_NO_FILE; }
-		num_fragments = frags(frag_offsets, frag_lengths, MAX_FRAGMENTS);
-		if (num_fragments > MAX_FRAGMENTS) { close(); return FR_FRAGMENTED; }
-		curr_fragment = 0;
+		if (get_fragments()) { close(); return FR_FRAGMENTED; }
 	}
 	return FR_OK;
 }
@@ -223,46 +256,6 @@ uint8_t FATFS::write(void) {
 		curr_fragment++;
 	}
 	return FR_OK;
-}
-
-uint8_t FATFS::frags(uint32_t * offsets, uint32_t * lengths, uint8_t max) {
-	if (!start_cluster) return 0;
-	if (start_cluster == 1) {
-		// root directory (FAT12/FAT16)
-		offsets[0] = root_sector;
-		lengths[0] = data_sector - root_sector;
-		return 1;
-	} else {
-		// file / subdirectory
-		uint32_t next_cluster;
-		uint8_t ptr;
-		last_fat_sector = 0;
-		curr_cluster = start_cluster;
-		curr_sector = 0;
-		offsets[0] = get_sector();
-		lengths[0] = cluster_size;
-		ptr = 0;
-		for (;;) {
-			next_cluster = get_fat(curr_cluster);
-			if (!next_cluster) {
-				curr_cluster = 0;
-				return ptr + 1;
-			} else if (next_cluster == curr_cluster + 1) {
-				curr_cluster = next_cluster;
-				lengths[ptr] += cluster_size;
-			} else {
-				ptr++;
-				if (ptr < max) {
-					curr_cluster = next_cluster;
-					offsets[ptr] = get_sector();
-					lengths[ptr] = cluster_size;
-				} else {
-					curr_cluster = 0;
-					return -1;
-				}
-			}
-		}
-	}
 }
 
 void FATFS::close(void) {

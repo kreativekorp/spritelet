@@ -36,6 +36,10 @@
 class FATFS {
 	public:
 		uint8_t buf[512];
+		uint32_t file_size;
+		uint32_t frag_offsets[MAX_FRAGMENTS];
+		uint32_t frag_lengths[MAX_FRAGMENTS];
+		uint8_t num_fragments;
 
 		void init(boolean startSPI);
 		uint8_t mount(void);
@@ -43,7 +47,6 @@ class FATFS {
 		uint8_t seek(uint32_t sector);
 		uint8_t read(void);
 		uint8_t write(void);
-		uint8_t frags(uint32_t * offsets, uint32_t * lengths, uint8_t max);
 		void close(void);
 
 	private:
@@ -56,19 +59,14 @@ class FATFS {
 		uint32_t data_sector;
 
 		uint32_t last_fat_sector;
-		uint32_t file_size;
 		uint32_t start_cluster;
 		uint32_t curr_cluster;
 		uint32_t curr_sector;
-
-		uint32_t frag_offsets[MAX_FRAGMENTS];
-		uint32_t frag_lengths[MAX_FRAGMENTS];
-		uint8_t num_fragments;
 		uint8_t curr_fragment;
 
 		uint8_t check_fs(uint32_t sector);
 		uint32_t get_fat(uint32_t cluster);
-		uint32_t get_sector(void);
+		uint8_t get_fragments(void);
 		char * next_name(char * path, char * name);
 		uint8_t name_cmp(char * n1, char * n2);
 		uint8_t find_name(char * name);

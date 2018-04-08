@@ -75,27 +75,27 @@ void loop(void) {
             Serial.println("error");
           } else {
             for (ptr = 0; ptr < 512; ptr += 32) {
-            	if (!fs.buf[ptr]) break;
-            	if (fs.buf[ptr] == 0xE5) continue;
-            	if (fs.buf[ptr] == 0x05) fs.buf[ptr] = 0xE5;
-            	if (fs.buf[ptr + 0x0B] & 0x0A) continue;
-            	for (ptr2 = 0; ptr2 < 8; ptr2++) tmp[ptr2] = fs.buf[ptr + ptr2];
-            	tmp[8] = ' ';
-            	for (ptr2 = 8; ptr2 < 11; ptr2++) tmp[ptr2 + 1] = fs.buf[ptr + ptr2];
-            	tmp[12] = 0;
-            	sector   = fs.buf[ptr + 0x15]; sector  <<= 8;
-            	sector  |= fs.buf[ptr + 0x14]; sector  <<= 8;
-            	sector  |= fs.buf[ptr + 0x1B]; sector  <<= 8;
-            	sector  |= fs.buf[ptr + 0x1A];
-            	sector2  = fs.buf[ptr + 0x1F]; sector2 <<= 8;
-            	sector2 |= fs.buf[ptr + 0x1E]; sector2 <<= 8;
-            	sector2 |= fs.buf[ptr + 0x1D]; sector2 <<= 8;
-            	sector2 |= fs.buf[ptr + 0x1C];
-            	Serial.print((char *)tmp);
-            	Serial.print("\t");
-            	Serial.print(sector, HEX);
-            	Serial.print("\t");
-            	Serial.println(sector2, HEX);
+              if (!fs.buf[ptr]) break;
+              if (fs.buf[ptr] == 0xE5) continue;
+              if (fs.buf[ptr] == 0x05) fs.buf[ptr] = 0xE5;
+              if (fs.buf[ptr + 0x0B] & 0x0A) continue;
+              for (ptr2 = 0; ptr2 < 8; ptr2++) tmp[ptr2] = fs.buf[ptr + ptr2];
+              tmp[8] = ' ';
+              for (ptr2 = 8; ptr2 < 11; ptr2++) tmp[ptr2 + 1] = fs.buf[ptr + ptr2];
+              tmp[12] = 0;
+              sector   = fs.buf[ptr + 0x15]; sector  <<= 8;
+              sector  |= fs.buf[ptr + 0x14]; sector  <<= 8;
+              sector  |= fs.buf[ptr + 0x1B]; sector  <<= 8;
+              sector  |= fs.buf[ptr + 0x1A];
+              sector2  = fs.buf[ptr + 0x1F]; sector2 <<= 8;
+              sector2 |= fs.buf[ptr + 0x1E]; sector2 <<= 8;
+              sector2 |= fs.buf[ptr + 0x1D]; sector2 <<= 8;
+              sector2 |= fs.buf[ptr + 0x1C];
+              Serial.print((char *)tmp);
+              Serial.print("\t");
+              Serial.print(sector, HEX);
+              Serial.print("\t");
+              Serial.println(sector2, HEX);
             }
           }
           break;
@@ -127,14 +127,13 @@ void loop(void) {
           }
           break;
         case 'f':
-          ptr = fs.frags(offsets, lengths, 16);
-          if (ptr < 1 || ptr > 16) {
+          if (fs.num_fragments < 1 || fs.num_fragments > MAX_FRAGMENTS) {
             Serial.println("error");
           } else {
-            for (ptr2 = 0; ptr2 < ptr; ptr2++) {
-              Serial.print(offsets[ptr2], HEX);
+            for (ptr = 0; ptr < fs.num_fragments; ptr++) {
+              Serial.print(fs.frag_offsets[ptr], HEX);
               Serial.print("\t");
-              Serial.println(lengths[ptr2], HEX);
+              Serial.println(fs.frag_lengths[ptr], HEX);
             }
           }
           break;
