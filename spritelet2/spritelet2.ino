@@ -20,6 +20,7 @@
 
 ST7735 tft = ST7735();
 FATFS fs = FATFS();
+static uint8_t index = 0;
 
 void setup(void) {
 	randomSeed(analogRead(2));
@@ -42,26 +43,81 @@ void setup(void) {
 		tft.fillScreen(0);
 	}
 
-	clouds_setup();
+	if (!fs.open("DEFAULTS.SYS")) {
+		if (!fs.read()) {
+			index = fs.buf[0];
+		}
+		fs.close();
+	}
 }
 
 void loop(void) {
-	uint32_t t = millis();
-	clouds_loop();
-	do {
-		switch (input_get()) {
-			case INPUT_UP: delay(50); while (input_get()); delay(50); tft.setRotation(3); tft.fillScreen(0x6C3F); break;
-			//case INPUT_DN: delay(50); while (input_get()); delay(50); tft.setRotation(1); tft.fillScreen(0x6C3F); break;
-			case INPUT_LT: delay(50); while (input_get()); delay(50); tft.setRotation(2); tft.fillScreen(0x6C3F); break;
-			case INPUT_RT: delay(50); while (input_get()); delay(50); tft.setRotation(0); tft.fillScreen(0x6C3F); break;
-			case INPUT_CTR:
-				delay(50); while (input_get()); delay(50); tft.setRotation(0);
-				if (carousel_setup()) while (carousel_loop()); clouds_setup();
-				break;
-			case INPUT_DN:
-				delay(50); while (input_get()); delay(50); tft.setRotation(0);
-				if (dx_setup()) while (dx_loop()); clouds_setup();
-				break;
+	switch (index) {
+		case 0: if (clouds_setup()) while (clouds_loop()); break;
+		case 1: if (carousel_setup()) while (carousel_loop()); break;
+		case 2: if (dx_setup()) while (dx_loop()); break;
+	}
+
+	home_menu();
+
+	if (!fs.open("DEFAULTS.SYS")) {
+		uint16_t ptr;
+		fs.buf[0] = index;
+		for (ptr = 1; ptr < 512; ptr++) fs.buf[ptr] = -1;
+		fs.write();
+		fs.close();
+	}
+}
+
+static void render_home_menu(uint8_t mask) {
+	uint16_t clr;
+	if (mask & 0x80) {
+		tft.fillRect(0, 0, 128, 16, 0x000F);
+		tft_drawString(4, 2, "Home", 0x000F, 0xFFFF);
+	}
+	if (mask & 0x40) {
+		clr = ((index == 0) ? 0xC000 : 0x0000);
+		tft.fillRect(0, 16, 128, 16, clr);
+		tft_drawString(4, 18, "Clouds", clr, 0xFFFF);
+	}
+	if (mask & 0x20) {
+		clr = ((index == 1) ? 0xC000 : 0x0000);
+		tft.fillRect(0, 32, 128, 16, clr);
+		tft_drawString(4, 34, "Carousel", clr, 0xFFFF);
+	}
+	if (mask & 0x10) {
+		clr = ((index == 2) ? 0xC000 : 0x0000);
+		tft.fillRect(0, 48, 128, 16, clr);
+		tft_drawString(4, 50, "dX", clr, 0xFFFF);
+	}
+}
+
+static void home_menu() {
+	uint8_t in_menu = 1, j;
+	render_home_menu(0xFF);
+	while (in_menu) {
+		if ((j = input_get())) {
+			switch (j) {
+				case INPUT_UP:
+				case INPUT_LT:
+					index = (index > 0) ? (index - 1) : 2;
+					render_home_menu(0x7F);
+					break;
+				case INPUT_DN:
+				case INPUT_RT:
+					index = (index < 2) ? (index + 1) : 0;
+					render_home_menu(0x7F);
+					break;
+				case INPUT_CTR:
+					tft.fillScreen(0);
+					in_menu = 0;
+					break;
+				default:
+					continue;
+			}
+			delay(50);
+			while (input_get());
+			delay(50);
 		}
-	} while (millis() - t < 30);
+	}
 }

@@ -2,6 +2,7 @@
 #include <avr/pgmspace.h>
 #include "clouds.h"
 #include "spi.h"
+#include "spritelet_input.h"
 #include "st7735_pins.h"
 #include "st7735.h"
 
@@ -58,16 +59,17 @@ static int16_t blit(const uint8_t * ptr, int16_t y, uint8_t h) {
 	return r;
 }
 
-void clouds_setup(void) {
+uint8_t clouds_setup(void) {
 	tft.setRotation(3);
 	tft.fillScreen(0x6C3F);
 	for (uint8_t i = 0; i < N_CLOUDS; i++) cloud[i].column = 255;
 	for (uint8_t i = 0; i < N_CLOUDS; i++) randomize(i, false);
+	return 1;
 }
 
-void clouds_loop(void) {
-	int16_t y;
-	uint8_t i, x, r;
+uint8_t clouds_loop(void) {
+	uint32_t t = millis();
+	int16_t y; uint8_t i, x, r;
 	for (i = 0; i < N_CLOUDS; i++) {
 		y = cloud[i].y >> 4;
 		if (y != cloud[i].prev) {
@@ -88,4 +90,15 @@ void clouds_loop(void) {
 		cloud[i].y -= ((cloud[i].column * 3) + 7);
 		if (cloud[i].y < cloud[i].endy) randomize(i, true);
 	}
+	do { 
+		if (input_get() == INPUT_CTR) {
+			tft.setRotation(0);
+			tft.fillScreen(0);
+			delay(50);
+			while (input_get());
+			delay(50);
+			return 0;
+		}
+	} while (millis() - t < 30);
+	return 1;
 }

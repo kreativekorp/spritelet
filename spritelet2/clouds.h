@@ -4,8 +4,8 @@
 #include <Arduino.h>
 #include <avr/pgmspace.h>
 
-void clouds_setup(void);
-void clouds_loop(void);
+uint8_t clouds_setup(void);
+uint8_t clouds_loop(void);
 
 #define K 0x00,0x00
 #define W 0xFF,0xFF
