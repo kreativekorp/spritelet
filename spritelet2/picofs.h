@@ -28,7 +28,10 @@
 #define FR_NOT_OPENED    4
 #define FR_NOT_ENABLED   5
 #define FR_NO_FILESYSTEM 6
-#define FR_EOF           7
+#define FR_FRAGMENTED    7
+#define FR_EOF           8
+
+#define MAX_FRAGMENTS 16
 
 class FATFS {
 	public:
@@ -51,16 +54,21 @@ class FATFS {
 		uint32_t fat_sector;
 		uint32_t root_sector;
 		uint32_t data_sector;
+
 		uint32_t last_fat_sector;
 		uint32_t file_size;
 		uint32_t start_cluster;
 		uint32_t curr_cluster;
 		uint32_t curr_sector;
 
+		uint32_t frag_offsets[MAX_FRAGMENTS];
+		uint32_t frag_lengths[MAX_FRAGMENTS];
+		uint8_t num_fragments;
+		uint8_t curr_fragment;
+
 		uint8_t check_fs(uint32_t sector);
 		uint32_t get_fat(uint32_t cluster);
 		uint32_t get_sector(void);
-		void advance_fat(void);
 		char * next_name(char * path, char * name);
 		uint8_t name_cmp(char * n1, char * n2);
 		uint8_t find_name(char * name);

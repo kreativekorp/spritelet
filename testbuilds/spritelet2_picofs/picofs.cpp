@@ -120,24 +120,6 @@ uint32_t FATFS::get_sector(void) {
 	return data_sector + ((curr_cluster - 2) * cluster_size) + curr_sector;
 }
 
-void FATFS::advance_fat(void) {
-	curr_sector++;
-	if (curr_cluster == 1) {
-		// root directory (FAT12/FAT16)
-		if (root_sector + curr_sector >= data_sector) {
-			curr_cluster = 0;
-			curr_sector = 0;
-		}
-	} else {
-		// file / subdirectory
-		if (curr_sector >= cluster_size) {
-			last_fat_sector = 0;
-			curr_cluster = get_fat(curr_cluster);
-			curr_sector = 0;
-		}
-	}
-}
-
 char * FATFS::next_name(char * path, char * name) {
 	uint8_t ptr = 0;
 	while ((*path) == '/' || (*path) == '\\') path++;
@@ -179,8 +161,6 @@ uint8_t FATFS::find_name(char * name) {
 				} else {
 					start_cluster = UINT16(buf[ptr + 26]);
 				}
-				curr_cluster = start_cluster;
-				curr_sector = 0;
 				return FR_OK;
 			}
 		}
@@ -192,62 +172,56 @@ uint8_t FATFS::open(char * path) {
 	char name[12];
 	file_size = 0;
 	start_cluster = (num_root_files ? 1 : root_sector);
-	curr_cluster = start_cluster;
-	curr_sector = 0;
+	num_fragments = frags(frag_offsets, frag_lengths, MAX_FRAGMENTS);
+	if (num_fragments > MAX_FRAGMENTS) { close(); return FR_FRAGMENTED; }
+	curr_fragment = 0;
 	while ((path = next_name(path, name))) {
-		if (find_name(name)) {
-			return FR_NO_FILE;
-		}
+		if (find_name(name)) { close(); return FR_NO_FILE; }
+		num_fragments = frags(frag_offsets, frag_lengths, MAX_FRAGMENTS);
+		if (num_fragments > MAX_FRAGMENTS) { close(); return FR_FRAGMENTED; }
+		curr_fragment = 0;
 	}
 	return FR_OK;
 }
 
 uint8_t FATFS::seek(uint32_t sector) {
 	if (!start_cluster) return FR_NOT_OPENED;
-	if (start_cluster == 1) {
-		// root directory (FAT12/FAT16)
-		if (root_sector + sector < data_sector) {
-			curr_cluster = 1;
+	for (curr_fragment = 0; curr_fragment < num_fragments; curr_fragment++) {
+		if (sector < frag_lengths[curr_fragment]) {
 			curr_sector = sector;
+			return FR_OK;
 		} else {
-			curr_cluster = 0;
-			curr_sector = 0;
-		}
-	} else {
-		// file / subdirectory
-		uint8_t cs = cluster_size - 1;
-		last_fat_sector = 0;
-		curr_cluster = start_cluster;
-		curr_sector = sector & cs;
-		while (cs) {
-			sector >>= 1;
-			cs >>= 1;
-		}
-		while (sector) {
-			curr_cluster = get_fat(curr_cluster);
-			sector--;
+			sector -= frag_lengths[curr_fragment];
 		}
 	}
-	return curr_cluster ? FR_OK : FR_EOF;
+	return FR_EOF;
 }
 
 uint8_t FATFS::read(void) {
 	uint32_t sector;
 	if (!start_cluster) return FR_NOT_OPENED;
-	if (!curr_cluster) return FR_EOF;
-	sector = get_sector();
-	advance_fat();
+	if (curr_fragment >= num_fragments) return FR_EOF;
+	sector = frag_offsets[curr_fragment] + curr_sector;
 	if (disk_read(buf, sector)) return FR_DISK_ERR;
+	curr_sector++;
+	if (curr_sector >= frag_lengths[curr_fragment]) {
+		curr_sector = 0;
+		curr_fragment++;
+	}
 	return FR_OK;
 }
 
 uint8_t FATFS::write(void) {
 	uint32_t sector;
 	if (!start_cluster) return FR_NOT_OPENED;
-	if (!curr_cluster) return FR_EOF;
-	sector = get_sector();
+	if (curr_fragment >= num_fragments) return FR_EOF;
+	sector = frag_offsets[curr_fragment] + curr_sector;
 	if (disk_write(buf, sector)) return FR_DISK_ERR;
-	advance_fat();
+	curr_sector++;
+	if (curr_sector >= frag_lengths[curr_fragment]) {
+		curr_sector = 0;
+		curr_fragment++;
+	}
 	return FR_OK;
 }
 
@@ -296,4 +270,6 @@ void FATFS::close(void) {
 	start_cluster = 0;
 	curr_cluster = 0;
 	curr_sector = 0;
+	num_fragments = 0;
+	curr_fragment = 0;
 }
