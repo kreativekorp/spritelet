@@ -18,6 +18,7 @@
 #include "st7735_init.h"
 #include "st7735_pins.h"
 #include "st7735.h"
+#include "toasters.h"
 
 ST7735 tft = ST7735();
 FATFS fs = FATFS();
@@ -27,11 +28,12 @@ static const char * PROGMEM mount_failed[] = { "Please insert", "MicroSD card." 
 static const char * PROGMEM defaults_path = "DEFAULTS.SYS";
 static const char * PROGMEM home_menu_title = "Home";
 
-#define HOME_MENU_ITEMS 3
+#define HOME_MENU_ITEMS 4
 static const char * PROGMEM home_menu_items[] = {
 	"Clouds",
 	"Carousel",
 	"dX",
+	"Toasters",
 };
 
 void setup(void) {
@@ -68,6 +70,7 @@ void loop(void) {
 		case 0: if (clouds_setup()) while (clouds_loop()); break;
 		case 1: if (carousel_setup()) while (carousel_loop()); break;
 		case 2: if (dx_setup()) while (dx_loop()); break;
+		case 3: if (toasters_setup()) while (toasters_loop()); break;
 	}
 
 	home_menu();
