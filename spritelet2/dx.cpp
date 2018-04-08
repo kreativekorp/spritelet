@@ -10,23 +10,22 @@
 extern ST7735 tft;
 extern FATFS fs;
 
-static uint32_t imageIndex;
+static uint16_t imageIndex;
 static uint16_t imageCount;
-static uint32_t imageData;
-static uint32_t diceIndex;
+static uint16_t imageData;
+static uint16_t diceIndex;
 static uint16_t diceCount;
-static uint32_t diceData;
-static uint32_t rollIndex;
+static uint16_t diceData;
+static uint16_t rollIndex;
 static uint16_t rollCount;
-static uint32_t rollData;
-static uint32_t layoutIndex;
+static uint16_t rollData;
+static uint16_t layoutIndex;
 static uint16_t layoutCount;
-static uint32_t layoutData;
-static uint32_t mem;
+static uint16_t layoutData;
+static uint16_t mem;
 static uint16_t currCount;
 static uint16_t orderType;
 static uint16_t currLayout;
-static uint32_t seed;
 
 #define MAX_DICE 64
 static uint16_t currOrder[MAX_DICE];
@@ -73,13 +72,13 @@ static uint8_t no_animation() {
 }
 
 static void render_image(uint16_t image, int16_t x, int16_t y, uint16_t size) {
-	uint32_t sect = image; sect <<= 7; sect += imageData; sect += size >> 9;
-	tft_drawGCI(sect, size & 0x1FF, x, y, no_animation);
+	uint32_t s = imageData; s += image; s <<= 7; s += size >> 9;
+	tft_drawGCI(s, size & 0x1FF, x, y, no_animation);
 }
 
-static uint16_t dx_seek(uint32_t base, uint16_t index, uint16_t offs) {
-	uint32_t sect = index; sect <<= 7; sect += base; sect += offs >> 9;
-	fs.seek(sect); fs.read(); return offs & 0x1FF;
+static uint16_t dx_seek(uint16_t base, uint16_t index, uint16_t sect, uint16_t offs) {
+	uint32_t s = base; s += index; s <<= 7; s += sect; s += offs >> 9;
+	fs.seek(s); return offs & 0x1FF;
 }
 
 static void render_dec(int16_t x, int16_t y, uint16_t value, uint16_t bg, uint16_t fg) {
@@ -107,23 +106,24 @@ static void error_message(uint16_t i, int16_t x) {
 /* ---- DX CORE ---- */
 
 static uint8_t load_4dx() {
+	uint32_t seed;
 	if (fs.open((char *)dx_path) || fs.read()) return 0;
 
-	imageIndex  = fs.buf[ 0]; imageIndex  <<= 8; imageIndex  |= fs.buf[ 1]; imageIndex  <<= 7;
+	imageIndex  = fs.buf[ 0]; imageIndex  <<= 8; imageIndex  |= fs.buf[ 1];
 	imageCount  = fs.buf[ 2]; imageCount  <<= 8; imageCount  |= fs.buf[ 3];
-	imageData   = fs.buf[ 4]; imageData   <<= 8; imageData   |= fs.buf[ 5]; imageData   <<= 7;
-	diceIndex   = fs.buf[ 8]; diceIndex   <<= 8; diceIndex   |= fs.buf[ 9]; diceIndex   <<= 7;
+	imageData   = fs.buf[ 4]; imageData   <<= 8; imageData   |= fs.buf[ 5];
+	diceIndex   = fs.buf[ 8]; diceIndex   <<= 8; diceIndex   |= fs.buf[ 9];
 	diceCount   = fs.buf[10]; diceCount   <<= 8; diceCount   |= fs.buf[11];
-	diceData    = fs.buf[12]; diceData    <<= 8; diceData    |= fs.buf[13]; diceData    <<= 7;
-	rollIndex   = fs.buf[16]; rollIndex   <<= 8; rollIndex   |= fs.buf[17]; rollIndex   <<= 7;
+	diceData    = fs.buf[12]; diceData    <<= 8; diceData    |= fs.buf[13];
+	rollIndex   = fs.buf[16]; rollIndex   <<= 8; rollIndex   |= fs.buf[17];
 	rollCount   = fs.buf[18]; rollCount   <<= 8; rollCount   |= fs.buf[19];
-	rollData    = fs.buf[20]; rollData    <<= 8; rollData    |= fs.buf[21]; rollData    <<= 7;
-	layoutIndex = fs.buf[24]; layoutIndex <<= 8; layoutIndex |= fs.buf[25]; layoutIndex <<= 7;
+	rollData    = fs.buf[20]; rollData    <<= 8; rollData    |= fs.buf[21];
+	layoutIndex = fs.buf[24]; layoutIndex <<= 8; layoutIndex |= fs.buf[25];
 	layoutCount = fs.buf[26]; layoutCount <<= 8; layoutCount |= fs.buf[27];
-	layoutData  = fs.buf[28]; layoutData  <<= 8; layoutData  |= fs.buf[29]; layoutData  <<= 7;
-	mem         = fs.buf[32]; mem         <<= 8; mem         |= fs.buf[33]; mem         <<= 7;
+	layoutData  = fs.buf[28]; layoutData  <<= 8; layoutData  |= fs.buf[29];
+	mem         = fs.buf[32]; mem         <<= 8; mem         |= fs.buf[33];
 
-	if (fs.seek(mem) || fs.read()) return 0;
+	dx_seek(mem, 0, 0, 0); if (fs.read()) return 0;
 
 	currCount   = fs.buf[ 0]; currCount   <<= 8; currCount   |= fs.buf[ 1];
 	orderType   = fs.buf[ 2]; orderType   <<= 8; orderType   |= fs.buf[ 3];
@@ -172,7 +172,7 @@ static void order_dice(uint8_t first) {
 static void roll_dice() {
 	uint16_t index, type, sides, maxs;
 	for (index = 0; index < currCount; index++) {
-		fs.seek(mem + index + 1); fs.read();
+		dx_seek(mem, 0, index + 1, 0); fs.read();
 		type  = fs.buf[ 2]; type  <<= 8; type  |= fs.buf[ 3];
 		sides = fs.buf[ 8]; sides <<= 8; sides |= fs.buf[ 9];
 		maxs  = fs.buf[14]; maxs  <<= 8; maxs  |= fs.buf[15];
@@ -186,7 +186,7 @@ static void roll_dice() {
 static void render_dice_digit(uint16_t dice, uint8_t place, uint8_t value, int16_t x, int16_t y, uint16_t size) {
 	uint16_t ptr, xoffs, image;
 	ptr = place; ptr <<= 4; ptr += value; ptr <<= 2; ptr += size;
-	ptr = dx_seek(diceData, dice, ptr);
+	ptr = dx_seek(diceData, dice, 0, ptr); fs.read();
 	xoffs = fs.buf[ptr++]; xoffs <<= 8; xoffs |= fs.buf[ptr++];
 	image = fs.buf[ptr++]; image <<= 8; image |= fs.buf[ptr++];
 	render_image(image, x + xoffs, y, size);
@@ -196,12 +196,12 @@ static void render_dice() {
 	uint16_t index, dice, type, minv, basev;
 	uint16_t ptr, x, y, size, value, image;
 	for (index = 0; index < currCount; index++) {
-		fs.seek(mem + index + 1); fs.read();
+		dx_seek(mem, 0, index + 1, 0); fs.read();
 		dice  = fs.buf[ 0]; dice  <<= 8; dice  |= fs.buf[ 1];
 		type  = fs.buf[ 2]; type  <<= 8; type  |= fs.buf[ 3];
 		minv  = fs.buf[ 6]; minv  <<= 8; minv  |= fs.buf[ 7];
 		basev = fs.buf[10]; basev <<= 8; basev |= fs.buf[11];
-		ptr = dx_seek(layoutData + currCount, currLayout, currOrder[index] * 6 + 2);
+		ptr = dx_seek(layoutData, currLayout, currCount, currOrder[index] * 6 + 2); fs.read();
 		x    = fs.buf[ptr++]; x    <<= 8; x    |= fs.buf[ptr++];
 		y    = fs.buf[ptr++]; y    <<= 8; y    |= fs.buf[ptr++];
 		size = fs.buf[ptr++]; size <<= 8; size |= fs.buf[ptr++];
@@ -212,12 +212,12 @@ static void render_dice() {
 		}
 		switch (type) {
 			case 0: case 1:
-				ptr = dx_seek(diceData + 2, dice, value << 1);
+				ptr = dx_seek(diceData, dice, 2, value << 1); fs.read();
 				image = fs.buf[ptr++]; image <<= 8; image |= fs.buf[ptr++];
 				render_image(image, x, y, size);
 				break;
 			case 2:
-				ptr = dx_seek(diceData + 1, dice, 8);
+				ptr = dx_seek(diceData, dice, 1, 8); fs.read();
 				image = fs.buf[ptr++]; image <<= 8; image |= fs.buf[ptr++];
 				render_image(image, x, y, size);
 				if (value < 10) {
@@ -261,7 +261,7 @@ static void render_amenu(uint8_t mask, char * title, char ** options, uint16_t c
 	}
 }
 
-static void render_rmenu(uint8_t mask, char * title, uint32_t base, uint16_t count, uint16_t start, uint16_t index) {
+static void render_rmenu(uint8_t mask, char * title, uint16_t base, uint16_t count, uint16_t start, uint16_t index) {
 	uint8_t m; uint16_t y, i, clr, ptr;
 	// Draw Header
 	if (mask & 0x80) {
@@ -274,8 +274,7 @@ static void render_rmenu(uint8_t mask, char * title, uint32_t base, uint16_t cou
 			clr = ((i == index) ? 0xC000 : 0x0000);
 			tft.fillRect(0, y, 128, 16, clr);
 			if (i < count) {
-				ptr = (((i & 0x0F) << 5) | 2);
-				fs.seek(base + (i >> 4)); fs.read();
+				ptr = dx_seek(base, 0, (i >> 4), (((i & 0x0F) << 5) | 2)); fs.read();
 				tft_drawString(4, y + 2, (char *)(fs.buf + ptr), clr, 0xFFFF);
 			} else if (i == count) {
 				tft_drawString(4, y + 2, (char *)cancel_menu_item, clr, 0xFFFF);
@@ -297,7 +296,7 @@ static void render_dmenu(uint8_t mask, char * title, uint16_t index) {
 	}
 	render_dice();
 	if (index < currCount) {
-		ptr = dx_seek(layoutData + currCount, currLayout, index * 6 + 2);
+		ptr = dx_seek(layoutData, currLayout, currCount, index * 6 + 2); fs.read();
 		x    = fs.buf[ptr++]; x    <<= 8; x    |= fs.buf[ptr++];
 		y    = fs.buf[ptr++]; y    <<= 8; y    |= fs.buf[ptr++];
 		size = fs.buf[ptr++]; size <<= 8; size |= fs.buf[ptr++];
@@ -417,7 +416,7 @@ static uint16_t amenu(char * title, char ** options, uint16_t count, uint16_t in
 	return index;
 }
 
-static uint16_t rmenu(char * title, uint32_t base, uint16_t count, uint16_t index) {
+static uint16_t rmenu(char * title, uint16_t base, uint16_t count, uint16_t index) {
 	uint16_t start = ((count <= 6 || index <= 3) ? 0 : (index < count - 3) ? (index - 3) : (count - 6));
 	uint8_t in_menu = 1, j;
 	render_rmenu(0xFF, title, base, count, start, index);
@@ -610,7 +609,7 @@ static uint16_t smenu(char * title, uint16_t basev, uint16_t maxs, uint16_t * mi
 
 static void write_mem_header() {
 	uint16_t i;
-	fs.seek(mem);
+	dx_seek(mem, 0, 0, 0);
 	fs.buf[ 0] = currCount >> 8;
 	fs.buf[ 1] = currCount;
 	fs.buf[ 2] = orderType >> 8;
@@ -636,14 +635,14 @@ static uint8_t load_preset_menu() {
 	uint8_t buf[16];
 	roll = rmenu((char *)main_menu_items[1], rollIndex, rollCount, 0);
 	if (roll >= rollCount) return 0;
-	dx_seek(rollData, roll, 0);
+	dx_seek(rollData, roll, 0, 0); fs.read();
 	currCount = fs.buf[0]; currCount <<= 8; currCount |= fs.buf[1];
 	orderType = fs.buf[2]; orderType <<= 8; orderType |= fs.buf[3];
 	write_mem_header();
 	for (i = 0; i < currCount; i++) {
-		ptr = dx_seek(rollData + 1, roll, i << 4);
+		ptr = dx_seek(rollData, roll, 1, i << 4); fs.read();
 		for (j = 0; j < 16; j++) buf[j] = fs.buf[ptr++];
-		fs.seek(mem + i + 1);
+		dx_seek(mem, 0, i + 1, 0);
 		for (j = 0; j < 16; j++) fs.buf[j] = buf[j];
 		for (j = 16; j < 512; j++) fs.buf[j] = -1;
 		fs.write();
@@ -658,7 +657,7 @@ static uint8_t replace_menu() {
 	uint16_t dice, type, basev, defs, maxs, minv, sides, i;
 	dice = rmenu((char *)main_menu_items[2], diceIndex, diceCount, 0);
 	if (dice >= diceCount) return 0;
-	dx_seek(diceData + 1, dice, 0);
+	dx_seek(diceData, dice, 1, 0); fs.read();
 	type  = fs.buf[0]; type  <<= 8; type  |= fs.buf[1];
 	basev = fs.buf[2]; basev <<= 8; basev |= fs.buf[3];
 	defs  = fs.buf[4]; defs  <<= 8; defs  |= fs.buf[5];
@@ -681,7 +680,7 @@ static uint8_t replace_menu() {
 			if (i >= 4) return 0;
 			break;
 	}
-	fs.seek(mem + 1);
+	dx_seek(mem, 0, 1, 0);
 	fs.buf[ 0] = dice  >> 8; fs.buf[ 1] = dice ;
 	fs.buf[ 2] = type  >> 8; fs.buf[ 3] = type ;
 	fs.buf[ 4] = 0         ; fs.buf[ 5] = 0    ;
@@ -706,7 +705,7 @@ static uint8_t add_menu() {
 	if (currCount >= MAX_DICE) { error_message(0, 25); return 0; }
 	dice = rmenu((char *)main_menu_items[3], diceIndex, diceCount, 0);
 	if (dice >= diceCount) return 0;
-	dx_seek(diceData + 1, dice, 0);
+	dx_seek(diceData, dice, 1, 0); fs.read();
 	type  = fs.buf[0]; type  <<= 8; type  |= fs.buf[1];
 	basev = fs.buf[2]; basev <<= 8; basev |= fs.buf[3];
 	defs  = fs.buf[4]; defs  <<= 8; defs  |= fs.buf[5];
@@ -729,7 +728,7 @@ static uint8_t add_menu() {
 			if (i >= 4) return 0;
 			break;
 	}
-	fs.seek(mem + currCount + 1);
+	dx_seek(mem, 0, currCount + 1, 0);
 	fs.buf[ 0] = dice  >> 8; fs.buf[ 1] = dice ;
 	fs.buf[ 2] = type  >> 8; fs.buf[ 3] = type ;
 	fs.buf[ 4] = 0         ; fs.buf[ 5] = 0    ;
@@ -752,7 +751,7 @@ static uint8_t edit_menu() {
 	uint16_t index, dice, type, value, basev, defs, maxs, minv, sides, i;
 	index = dmenu((char *)main_menu_items[4], 0);
 	if (index >= currCount) return 0;
-	fs.seek(mem + index + 1); fs.read();
+	dx_seek(mem, 0, index + 1, 0); fs.read();
 	dice  = fs.buf[ 0]; dice  <<= 8; dice  |= fs.buf[ 1];
 	type  = fs.buf[ 2]; type  <<= 8; type  |= fs.buf[ 3];
 	value = fs.buf[ 4]; value <<= 8; value |= fs.buf[ 5];
@@ -774,7 +773,7 @@ static uint8_t edit_menu() {
 			if (i >= 4) return 0;
 			break;
 	}
-	fs.seek(mem + index + 1);
+	dx_seek(mem, 0, index + 1, 0);
 	fs.buf[ 0] = dice  >> 8; fs.buf[ 1] = dice ;
 	fs.buf[ 2] = type  >> 8; fs.buf[ 3] = type ;
 	fs.buf[ 4] = value >> 8; fs.buf[ 5] = value;
@@ -800,9 +799,9 @@ static uint8_t remove_menu() {
 	currCount--;
 	write_mem_header();
 	while (index < currCount) {
-		fs.seek(mem + index + 2); fs.read();
+		dx_seek(mem, 0, index + 2, 0); fs.read();
 		for (i = 0; i < 16; i++) buf[i] = fs.buf[i];
-		fs.seek(mem + index + 1);
+		dx_seek(mem, 0, index + 1, 0);
 		for (i = 0; i < 16; i++) fs.buf[i] = buf[i];
 		for (i = 16; i < 512; i++) fs.buf[i] = -1;
 		fs.write();
