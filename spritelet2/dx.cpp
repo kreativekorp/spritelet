@@ -5,6 +5,7 @@
 #include "spritelet_bitmap.h"
 #include "spritelet_font.h"
 #include "spritelet_input.h"
+#include "spritelet_util.h"
 #include "st7735.h"
 
 extern ST7735 tft;
@@ -89,16 +90,6 @@ static void render_dec(int16_t x, int16_t y, uint16_t value, uint16_t bg, uint16
 	if (value) { s[1] = '0' + value % 10; value /= 10; } else { s[1] = ' '; }
 	if (value) { s[0] = '0' + value % 10;              } else { s[0] = ' '; }
 	tft_drawString(x, y, s, bg, fg);
-}
-
-static void error_message(uint16_t i, int16_t x) {
-	tft.fillScreen(0);
-	tft_drawString(x, 58, (char *)error_messages[i], 0, 0xFFE0);
-	while (!input_get());
-	delay(50);
-	while (input_get());
-	delay(50);
-	tft.fillScreen(0);
 }
 
 
@@ -702,7 +693,10 @@ static uint8_t replace_menu() {
 
 static uint8_t add_menu() {
 	uint16_t dice, type, basev, defs, maxs, minv, sides, i;
-	if (currCount >= MAX_DICE) { error_message(0, 25); return 0; }
+	if (currCount >= MAX_DICE) {
+		error_message(25, (char *)error_messages[0], 0, 0, 0xFFE0);
+		return 0;
+	}
 	dice = rmenu((char *)main_menu_items[3], diceIndex, diceCount, 0);
 	if (dice >= diceCount) return 0;
 	dx_seek(diceData, dice, 1, 0); fs.read();
@@ -762,7 +756,7 @@ static uint8_t edit_menu() {
 	maxs  = fs.buf[14]; maxs  <<= 8; maxs  |= fs.buf[15];
 	switch (type) {
 		case 0:
-			error_message(1, 25);
+			error_message(25, (char *)error_messages[1], 0, 0, 0xFFE0);
 			return 0;
 		case 1:
 			i = smenu((char *)main_menu_items[4], basev, maxs, &minv, &sides, 0);
@@ -793,7 +787,10 @@ static uint8_t edit_menu() {
 static uint8_t remove_menu() {
 	uint16_t index, i;
 	uint8_t buf[16];
-	if (currCount < 2) { error_message(2, 10); return 0; }
+	if (currCount < 2) {
+		error_message(10, (char *)error_messages[2], 0, 0, 0xFFE0);
+		return 0;
+	}
 	index = dmenu((char *)main_menu_items[5], 0);
 	if (index >= currCount) return 0;
 	currCount--;
@@ -865,13 +862,7 @@ uint8_t dx_setup(void) {
 		render_dice();
 		return 1;
 	} else {
-		tft.fillScreen(0);
-		tft_drawString(16, 58, (char *)dx_not_found, 0, -1);
-		while (!input_get());
-		delay(50);
-		while (input_get());
-		delay(50);
-		tft.fillScreen(0);
+		error_message(16, (char *)dx_not_found, 0, 0, -1);
 		return 0;
 	}
 }

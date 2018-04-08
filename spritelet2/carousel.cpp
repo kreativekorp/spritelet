@@ -5,6 +5,7 @@
 #include "spritelet_bitmap.h"
 #include "spritelet_font.h"
 #include "spritelet_input.h"
+#include "spritelet_util.h"
 #include "st7735.h"
 
 extern ST7735 tft;
@@ -258,14 +259,7 @@ static uint8_t render_video(uint16_t i) {
 
 uint8_t carousel_setup(void) {
 	if (fs.open((char *)toc_path) || fs.read()) {
-		tft.fillScreen(0);
-		tft_drawString(20, 52, (char *)toc_not_found[0], 0, -1);
-		tft_drawString(20, 64, (char *)toc_not_found[1], 0, -1);
-		while (!input_get());
-		delay(50);
-		while (input_get());
-		delay(50);
-		tft.fillScreen(0);
+		error_message(20, (char *)toc_not_found[0], 20, (char *)toc_not_found[1], -1);
 		return 0;
 	} else {
 		menu_count = fs.buf[0]; menu_count <<= 8; menu_count |= fs.buf[1];

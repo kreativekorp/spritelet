@@ -12,6 +12,7 @@
 #include "spritelet_font.h"
 #include "spritelet_input.h"
 #include "spritelet_pins.h"
+#include "spritelet_util.h"
 #include "st7735_commands.h"
 #include "st7735_config.h"
 #include "st7735_init.h"
@@ -21,6 +22,17 @@
 ST7735 tft = ST7735();
 FATFS fs = FATFS();
 static uint8_t index = 0;
+
+static const char * PROGMEM mount_failed[] = { "Please insert", "MicroSD card." };
+static const char * PROGMEM defaults_path = "DEFAULTS.SYS";
+static const char * PROGMEM home_menu_title = "Home";
+
+#define HOME_MENU_ITEMS 3
+static const char * PROGMEM home_menu_items[] = {
+	"Clouds",
+	"Carousel",
+	"dX",
+};
 
 void setup(void) {
 	randomSeed(analogRead(2));
@@ -37,13 +49,13 @@ void setup(void) {
 
 	fs.init(false);
 	if (fs.mount()) {
-		tft_drawString(25, 52, "Please insert", 0, -1);
-		tft_drawString(25, 64, "MicroSD card.", 0, -1);
+		tft_drawString(25, 52, (char *)mount_failed[0], 0, -1);
+		tft_drawString(25, 64, (char *)mount_failed[1], 0, -1);
 		do { delay(500); } while (fs.mount());
 		tft.fillScreen(0);
 	}
 
-	if (!fs.open("DEFAULTS.SYS")) {
+	if (!fs.open((char *)defaults_path)) {
 		if (!fs.read()) {
 			index = fs.buf[0];
 		}
@@ -60,7 +72,7 @@ void loop(void) {
 
 	home_menu();
 
-	if (!fs.open("DEFAULTS.SYS")) {
+	if (!fs.open((char *)defaults_path)) {
 		uint16_t ptr;
 		fs.buf[0] = index;
 		for (ptr = 1; ptr < 512; ptr++) fs.buf[ptr] = -1;
@@ -70,25 +82,19 @@ void loop(void) {
 }
 
 static void render_home_menu(uint8_t mask) {
-	uint16_t clr;
+	uint8_t m; uint16_t y, i, clr;
+	// Draw Header
 	if (mask & 0x80) {
 		tft.fillRect(0, 0, 128, 16, 0x000F);
-		tft_drawString(4, 2, "Home", 0x000F, 0xFFFF);
+		tft_drawString(4, 2, (char *)home_menu_title, 0x000F, 0xFFFF);
 	}
-	if (mask & 0x40) {
-		clr = ((index == 0) ? 0xC000 : 0x0000);
-		tft.fillRect(0, 16, 128, 16, clr);
-		tft_drawString(4, 18, "Clouds", clr, 0xFFFF);
-	}
-	if (mask & 0x20) {
-		clr = ((index == 1) ? 0xC000 : 0x0000);
-		tft.fillRect(0, 32, 128, 16, clr);
-		tft_drawString(4, 34, "Carousel", clr, 0xFFFF);
-	}
-	if (mask & 0x10) {
-		clr = ((index == 2) ? 0xC000 : 0x0000);
-		tft.fillRect(0, 48, 128, 16, clr);
-		tft_drawString(4, 50, "dX", clr, 0xFFFF);
+	// Draw Menu Items
+	for (m = 0x40, y = 16, i = 0; i < HOME_MENU_ITEMS; m >>= 1, y += 16, i++) {
+		if (mask & m) {
+			clr = ((i == index) ? 0xC000 : 0x0000);
+			tft.fillRect(0, y, 128, 16, clr);
+			tft_drawString(4, y + 2, (char *)home_menu_items[i], clr, 0xFFFF);
+		}
 	}
 }
 
@@ -100,12 +106,12 @@ static void home_menu() {
 			switch (j) {
 				case INPUT_UP:
 				case INPUT_LT:
-					index = (index > 0) ? (index - 1) : 2;
+					index = (index > 0) ? (index - 1) : (HOME_MENU_ITEMS - 1);
 					render_home_menu(0x7F);
 					break;
 				case INPUT_DN:
 				case INPUT_RT:
-					index = (index < 2) ? (index + 1) : 0;
+					index = (index < (HOME_MENU_ITEMS - 1)) ? (index + 1) : 0;
 					render_home_menu(0x7F);
 					break;
 				case INPUT_CTR:
