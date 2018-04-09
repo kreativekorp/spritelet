@@ -254,14 +254,14 @@ uint8_t toasters_loop(void) {
 		flyer[i].y += flyer[i].depth;
 		if ((flyer[i].y >= 2048) || (flyer[i].x <= -512)) {
 			if (random(2)) {
-				flyer[i].x = random(160) * 16;
+				flyer[i].x = random(128) * 16;
 				flyer[i].y = -512;
 			} else {
 				flyer[i].x = 2048;
 				flyer[i].y = random(128) * 16;
 			}
 			flyer[i].depth = random(16) + 10;
-			flyer[i].frame = random(3) ? random(4) : 4;
+			flyer[i].frame = random(4) ? random(4) : 4;
 			// resort = true;
 		}
 	}
