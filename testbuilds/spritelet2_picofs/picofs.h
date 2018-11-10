@@ -12,14 +12,14 @@
 #define FS_FAT16 2
 #define FS_FAT32 3
 
-#define	AM_RDO	0x01
-#define	AM_HID	0x02
-#define	AM_SYS	0x04
-#define	AM_VOL	0x08
-#define AM_LFN	0x0F
-#define AM_DIR	0x10
-#define AM_ARC	0x20
-#define AM_MASK	0x3F
+#define AM_RDO  0x01
+#define AM_HID  0x02
+#define AM_SYS  0x04
+#define AM_VOL  0x08
+#define AM_LFN  0x0F
+#define AM_DIR  0x10
+#define AM_ARC  0x20
+#define AM_MASK 0x3F
 
 #define FR_OK            0
 #define FR_DISK_ERR      1
