@@ -185,10 +185,6 @@ static const uint8_t * toaster_bitmap[] PROGMEM = {
 	toast_bitmap
 };
 
-static int compare(const void * a, const void * b) {
-	return ((struct Flyer *)a)->depth - ((struct Flyer *)b)->depth;
-}
-
 uint8_t toasters_setup(void) {
 	uint8_t i;
 	for (i = 0; i < N_FLYERS; i++) {
@@ -197,7 +193,6 @@ uint8_t toasters_setup(void) {
 		flyer[i].depth = random(16) + 10;
 		flyer[i].frame = random(4) ? random(4) : 4;
 	}
-	// qsort(flyer, N_FLYERS, sizeof(struct Flyer), compare);
 	return 1;
 }
 
@@ -209,7 +204,6 @@ uint8_t toasters_loop(void) {
 	uint8_t * mask;
 	uint8_t * bitmap;
 	uint8_t mbi, mbm;
-	// boolean resort;
 
 	tft.setAddrWindow(0, 0, 127, 127);
 	TFT_DC_PORT |=  TFT_DC_MASK;
@@ -246,7 +240,6 @@ uint8_t toasters_loop(void) {
 	}
 	TFT_CS_PORT |=  TFT_CS_MASK;
 
-	// resort = false;
 	for (i = 0; i < N_FLYERS; i++) {
 		if (flyer[i].frame < 4) flyer[i].frame = ((flyer[i].frame + 1) & 3);
 		flyer[i].x -= flyer[i].depth;
@@ -262,10 +255,8 @@ uint8_t toasters_loop(void) {
 			}
 			flyer[i].depth = random(16) + 10;
 			flyer[i].frame = random(4) ? random(4) : 4;
-			// resort = true;
 		}
 	}
-	// if (resort) qsort(flyer, N_FLYERS, sizeof(struct Flyer), compare);
 
 	do { 
 		if (input_get() == INPUT_CTR) {
