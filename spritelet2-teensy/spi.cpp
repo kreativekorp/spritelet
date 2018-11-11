@@ -5,16 +5,16 @@
 void SPI_readBlock(uint8_t * buf, uint16_t cnt) {
   while (cnt) {
     *buf = SPI_read();
-	buf++;
-	cnt--;
+    buf++;
+    cnt--;
   }
 }
 
 void SPI_writeBlock(uint8_t * buf, uint16_t cnt) {
   while (cnt) {
     SPI_write(*buf);
-	buf++;
-	cnt--;
+    buf++;
+    cnt--;
   }
 }
 
