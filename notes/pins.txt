@@ -1,0 +1,22 @@
+Pin         Trinket     Teensy      ItsyBitsy
+----------- ----------- ----------- -----------
+SCK         13 (PB5)    13          SCK  (PB1)
+MISO        12 (PB4)    12          MISO (PB3)
+MOSI        11 (PB3)    11          MOSI (PB2)
+SS          10 (PB2)    10          SS   (PB0)
+----------- ----------- ----------- -----------
+TFT CS      10 (PB2)    10           9 (PB5)
+TFT D/C      8 (PB0)     8          11 (PB7)
+TFT RST      6 (PD6)     9          10 (PB6)
+TFT LITE     9 (PB1)     5          13 (PC7)
+SD CS        5 (PD5)     6          12 (PD6)
+----------- ----------- ----------- -----------
+VS GND       4 (PD4)     4           5 (PC6)
+VS POS       3 (PD3)     3           7 (PE6)
+----------- ----------- ----------- -----------
+JOY COM     A0 (PC0)    14          A0 (PF7)
+JOY CTR     A1 (PC1)    19          A1 (PF6)
+JOY UP      A2 (PC2)    18          A2 (PF5)
+JOY DN      A3 (PC3)    15          A3 (PF4)
+JOY LT      A4 (PC4)    17          A4 (PF1)
+JOY RT      A5 (PC5)    16          A5 (PF0)
