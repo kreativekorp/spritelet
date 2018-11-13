@@ -216,8 +216,8 @@ uint8_t toasters_loop(void) {
       fy = flyer[i].y >> 4;
       if ((y >= fy) && (y < fy + 32)) {
         f = flyer[i].frame;
-        mask = (uint8_t *)pgm_read_word(&toaster_mask[f]);
-        bitmap = (uint8_t *)pgm_read_word(&toaster_bitmap[f]);
+        mask = (uint8_t *)pgm_read_dword(&toaster_mask[f]);
+        bitmap = (uint8_t *)pgm_read_dword(&toaster_bitmap[f]);
         mbi = ((y - fy) << 2);
         mbm = 0x80;
         for (fx = flyer[i].x >> 4, x = 0; x < 32; x++, fx++) {

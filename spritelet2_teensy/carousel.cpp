@@ -205,6 +205,8 @@ static uint8_t menu() {
       }
     }
   }
+  // execution should not reach this point
+  return 0;
 }
 
 static uint8_t render_video_callback() {

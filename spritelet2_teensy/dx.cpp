@@ -185,7 +185,7 @@ static void render_dice_digit(uint16_t dice, uint8_t place, uint8_t value, int16
 
 static void render_dice() {
   uint16_t index, dice, type, minv, basev;
-  uint16_t ptr, x, y, size, value, image;
+  uint16_t ptr, x, y, size, value = 0, image;
   for (index = 0; index < currCount; index++) {
     dx_seek(mem, 0, index + 1, 0); fs.read();
     dice  = fs.buf[ 0]; dice  <<= 8; dice  |= fs.buf[ 1];
