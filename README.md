@@ -25,33 +25,69 @@ To make a Spritelet you will need the following hardware:
 
 Any of these supported microcontroller boards can be used:
 
-  *  [Arduino Nano](https://store.arduino.cc/usa/arduino-nano)
+  *  [Arduino Nano](https://store.arduino.cc/usa/arduino-nano) (not recommended)
   *  [Teensy 3.1/3.2](https://www.pjrc.com/teensy/teensy31.html)
   *  [Teensy LC](https://www.pjrc.com/teensy/teensyLC.html)
   *  [Adafruit Pro Trinket](https://www.adafruit.com/product/2000)
   *  [Adafruit ItsyBitsy 32u4](https://www.adafruit.com/product/3677)
   *  [Adafruit ItsyBitsy M0 Express](https://www.adafruit.com/product/3727)
 
-You can of course use any board supported by the Arduino IDE, but without an appropriate interconnect board you won't be able to make it into a finished product.
+You can of course use any board supported by the Arduino IDE, but without an appropriate interconnect board you won't be able to make it into a finished product. Also, any board larger than an Arduino Nano will not fit inside the enclosure.
 
-TODO more stuff here
+Assembly is easy except for the following caveats:
+
+  *  Solder all other components *before* soldering the LCD display board! Otherwise the LCD display board will block soldering the other components.
+  *  Separate the LCD display board from the interconnect board with electrical tape or a piece of cardboard to prevent the MicroSD card connector from shorting the navigation switch.
+  *  On Arduino Nano boards, you will need to solder a wire from the VUSB hole of the interconnect board to the VCC pin of the USB connector.
+  *  On Teensy boards, you will need to cut the jumper on the back to separate VIN from VUSB.
+  *  On the LiPoly Backpack Addon, you will need to cut the trace between the two holes with a box around them to add an on/off switch.
+
+The MicroSD card will need to contain the contents of the [userland](userland) directory. To add images and animations, use the SpriteLoader application (just dragging files into the SPRITES directory will not work).
 
 ## Arduino Nano
+
+  *  Store link: https://store.arduino.cc/usa/arduino-nano
+  *  Firmware: [spritelet2_protrinket](spritelet2_protrinket)
+  *  Interconnect board files: [board-nano](board-nano)
+  *  Interconnect board purchase link: https://aisler.net/p/DWZPRWWS
+  *  On Arduino Nano boards, you will need to solder a wire from the VUSB hole of the interconnect board to the VCC pin of the USB connector.
 
 TODO more stuff here
 
 ## Teensy 3.1/3.2/LC
 
+  *  Store link (3.1/3.2): https://www.pjrc.com/teensy/teensy31.html
+  *  Store link (LC): https://www.pjrc.com/teensy/teensyLC.html
+  *  Firmware: [spritelet2_teensy](spritelet2_teensy)
+  *  Interconnect board files: [board-teensy](board-teensy)
+  *  Interconnect board purchase link: https://aisler.net/p/WDFHSKDK
+  *  On Teensy boards, you will need to cut the jumper on the back to separate VIN from VUSB.
+
 TODO more stuff here
 
 ## Adafruit Pro Trinket
+
+  *  Store link: https://www.adafruit.com/product/2000
+  *  Firmware: [spritelet2_protrinket](spritelet2_protrinket)
+  *  Interconnect board files: [board-protrinket](board-protrinket)
+  *  Interconnect board purchase link: https://aisler.net/p/WMPMXXAI
 
 TODO more stuff here
 
 ## Adafruit ItsyBitsy 32u4
 
+  *  Store link: https://www.adafruit.com/product/3677
+  *  Firmware: [spritelet2_itsybitsy_32u4](spritelet2_itsybitsy_32u4)
+  *  Interconnect board files: [board-itsybitsy](board-itsybitsy)
+  *  Interconnect board purchase link: https://aisler.net/p/JNFEJXOJ
+
 TODO more stuff here
 
 ## Adafruit ItsyBitsy M0 Express
+
+  *  Store link: https://www.adafruit.com/product/3727
+  *  Firmware: [spritelet2_itsybitsy_m0](spritelet2_itsybitsy_m0)
+  *  Interconnect board files: [board-itsybitsy](board-itsybitsy)
+  *  Interconnect board purchase link: https://aisler.net/p/JNFEJXOJ
 
 TODO more stuff here
