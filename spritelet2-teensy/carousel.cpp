@@ -19,11 +19,11 @@ static uint16_t advmenu_start;
 static uint16_t advmenu_index;
 static uint32_t advmenu_timer;
 
-static const char * PROGMEM menu_items[] = { "Cycle Through", "Randomize", "Home" };
-static const char * PROGMEM advmenu_title = "Set Time Delay";
-static const char * PROGMEM advmenu_cancel = "Cancel";
-static const char * PROGMEM toc_path = "SPRITES/SPRITES.STC";
-static const char * PROGMEM toc_not_found[] = { "Could not find", "SPRITES folder." };
+static const char * const PROGMEM menu_items[] = { "Cycle Through", "Randomize", "Home" };
+static const char * const PROGMEM advmenu_title = "Set Time Delay";
+static const char * const PROGMEM advmenu_cancel = "Cancel";
+static const char * const PROGMEM toc_path = "SPRITES/SPRITES.STC";
+static const char * const PROGMEM toc_not_found[] = { "Could not find", "SPRITES folder." };
 
 static void render_menu(uint8_t mask) {
   uint8_t m; uint16_t y, i, clr, ptr, sect;
