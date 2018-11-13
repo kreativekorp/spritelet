@@ -24,12 +24,12 @@ ST7735 tft = ST7735();
 FATFS fs = FATFS();
 static uint8_t index = 0;
 
-static const char * PROGMEM mount_failed[] = { "Please insert", "MicroSD card." };
-static const char * PROGMEM defaults_path = "DEFAULTS.SYS";
-static const char * PROGMEM home_menu_title = "Home";
+static const char * const PROGMEM mount_failed[] = { "Please insert", "MicroSD card." };
+static const char * const PROGMEM defaults_path = "DEFAULTS.SYS";
+static const char * const PROGMEM home_menu_title = "Home";
 
 #define HOME_MENU_ITEMS 4
-static const char * PROGMEM home_menu_items[] = {
+static const char * const PROGMEM home_menu_items[] = {
 	"Clouds",
 	"Carousel",
 	"dX",

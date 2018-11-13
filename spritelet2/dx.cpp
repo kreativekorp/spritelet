@@ -36,16 +36,16 @@ static uint16_t currValue[MAX_DICE];
 
 /* ---- STRINGS ---- */
 
-static const char * PROGMEM dx_path = "DICE.4DX";
-static const char * PROGMEM dx_not_found = "Cannot find 4DX.";
-static const char * PROGMEM main_menu_title = "dX";
-static const char * PROGMEM ok_menu_item = "OK";
-static const char * PROGMEM cancel_menu_item = "Cancel";
-static const char * PROGMEM smenu_items[] = { "Min. Value:", "Max. Value:", "Num. Sides:" };
-static const char * PROGMEM error_messages[] = { "No more room!", "Not editable!", "Nothing to remove!" };
+static const char * const PROGMEM dx_path = "DICE.4DX";
+static const char * const PROGMEM dx_not_found = "Cannot find 4DX.";
+static const char * const PROGMEM main_menu_title = "dX";
+static const char * const PROGMEM ok_menu_item = "OK";
+static const char * const PROGMEM cancel_menu_item = "Cancel";
+static const char * const PROGMEM smenu_items[] = { "Min. Value:", "Max. Value:", "Num. Sides:" };
+static const char * const PROGMEM error_messages[] = { "No more room!", "Not editable!", "Nothing to remove!" };
 
 #define MAIN_MENU_ITEMS 9
-static const char * PROGMEM main_menu_items[] = {
+static const char * const PROGMEM main_menu_items[] = {
 	"Roll",
 	"Load Preset",
 	"Replace",
@@ -58,7 +58,7 @@ static const char * PROGMEM main_menu_items[] = {
 };
 
 #define SET_ORDER_MENU_ITEMS 3
-static const char * PROGMEM set_order_menu_items[] = {
+static const char * const PROGMEM set_order_menu_items[] = {
 	"Normal",
 	"Reverse",
 	"Random",

@@ -169,7 +169,7 @@ static const uint8_t PROGMEM toast_bitmap[] = {
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 };
 
-static const uint8_t * toaster_mask[] PROGMEM = {
+static const uint8_t * const toaster_mask[] PROGMEM = {
 	toaster_mask_0,
 	toaster_mask_1,
 	toaster_mask_2,
@@ -177,7 +177,7 @@ static const uint8_t * toaster_mask[] PROGMEM = {
 	toast_mask
 };
 
-static const uint8_t * toaster_bitmap[] PROGMEM = {
+static const uint8_t * const toaster_bitmap[] PROGMEM = {
 	toaster_bitmap_0,
 	toaster_bitmap_1,
 	toaster_bitmap_2,
