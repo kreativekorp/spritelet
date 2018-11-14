@@ -25,12 +25,12 @@ To make a Spritelet you will need the following hardware:
 
 Any of these supported microcontroller boards can be used:
 
-  *  [Arduino Nano](https://store.arduino.cc/usa/arduino-nano) (not recommended)
-  *  [Teensy 3.1/3.2](https://www.pjrc.com/teensy/teensy31.html)
-  *  [Teensy LC](https://www.pjrc.com/teensy/teensyLC.html)
-  *  [Adafruit Pro Trinket](https://www.adafruit.com/product/2000)
-  *  [Adafruit ItsyBitsy 32u4](https://www.adafruit.com/product/3677)
-  *  [Adafruit ItsyBitsy M0 Express](https://www.adafruit.com/product/3727)
+  *  [Arduino Nano](#arduino-nano) (not recommended)
+  *  [Teensy 3.1/3.2](#teensy-3132lc)
+  *  [Teensy LC](#teensy-3132lc)
+  *  [Adafruit Pro Trinket](#adafruit-pro-trinket)
+  *  [Adafruit ItsyBitsy 32u4](#adafruit-itsybitsy-32u4)
+  *  [Adafruit ItsyBitsy M0 Express](#adafruit-itsybitsy-m0-express)
 
 You can of course use any board supported by the Arduino IDE, but without an appropriate interconnect board you won't be able to make it into a finished product. Also, any board larger than an Arduino Nano will not fit inside the enclosure.
 
