@@ -32,9 +32,9 @@ Any of these supported microcontroller boards can be used:
   *  [Adafruit ItsyBitsy 32u4](#adafruit-itsybitsy-32u4)
   *  [Adafruit ItsyBitsy M0 Express](#adafruit-itsybitsy-m0-express)
 
-You can of course use any board supported by the Arduino IDE, but without an appropriate interconnect board you won't be able to make it into a finished product. Also, any board larger than an Arduino Nano will not fit inside the enclosure.
+You can of course use any board supported by the Arduino IDE with enough memory and pins, but without an appropriate interconnect board you won't be able to turn it into a finished product. Also, any board larger than an Arduino Nano will not fit inside the enclosure.
 
-Assembly is easy except for the following caveats:
+Assembly is reasonably self-explanatory except for the following caveats:
 
   *  Solder all other components *before* soldering the LCD display board! Otherwise the LCD display board will block soldering the other components.
   *  Separate the LCD display board from the interconnect board with electrical tape or a piece of cardboard to prevent the MicroSD card connector from shorting the navigation switch.
