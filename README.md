@@ -4,10 +4,10 @@ A Spritelet is a small box with a 128 x 128 pixel LCD screen for playing animati
 
 The Spritelet v2 software includes four applications:
 
-  *  Clouds: Clouds from a kingdom on shrooms drift past the screen.
+  *  Clouds: Weather formations from a kingdom on shrooms drift past the screen.
   *  Carousel: The main application. Displays animations and static images from an SD card.
-  *  dX: An overengineered electronic dice roller.
-  *  Toasters: Kitchen appliances with wings fly past the screen.
+  *  dX: An overengineered electronic dice roller with hundreds of types of dice.
+  *  Toasters: Airborne kitchen appliances with wings fly past the screen.
 
 To make a Spritelet you will need the following hardware:
 
@@ -47,12 +47,23 @@ The MicroSD card will need to contain the contents of the [userland](userland) d
 ## Arduino Nano
 
   *  Store link: https://store.arduino.cc/usa/arduino-nano
-  *  Firmware: [spritelet2_protrinket](spritelet2_protrinket)
+  *  Firmware: [spritelet2_protrinket](spritelet2_protrinket) (Arduino Nano and Pro Trinket use the same firmware)
   *  Interconnect board files: [board-nano](board-nano)
   *  Interconnect board purchase link: https://aisler.net/p/DWZPRWWS
   *  On Arduino Nano boards, you will need to solder a wire from the VUSB hole of the interconnect board to the VCC pin of the USB connector.
 
-TODO more stuff here
+Pin mapping:
+
+| Function | Pin | Port | Function | Pin | Port |
+| -------- | --- | ---- | -------- | --- | ---- |
+| SCK      | 13  | PB5  | VS GND   |  4  | PD4  |
+| MISO     | 12  | PB4  | VS POS   |  3  | PD3  |
+| MOSI     | 11  | PB3  | JOY COM  | A0  | PC0  |
+| TFT CS   | 10  | PB2  | JOY CTR  | A1  | PC1  |
+| TFT D/C  |  8  | PB0  | JOY UP   | A2  | PC2  |
+| TFT RST  |  6  | PD6  | JOY DN   | A3  | PC3  |
+| TFT LITE |  9  | PB1  | JOY LT   | A4  | PC4  |
+| SD CS    |  5  | PD5  | JOY RT   | A5  | PC5  |
 
 ## Teensy 3.1/3.2/LC
 
@@ -63,7 +74,18 @@ TODO more stuff here
   *  Interconnect board purchase link: https://aisler.net/p/WDFHSKDK
   *  On Teensy boards, you will need to cut the jumper on the back to separate VIN from VUSB.
 
-TODO more stuff here
+Pin mapping:
+
+| Function | Pin | Function | Pin |
+| -------- | --- | -------- | --- |
+| SCK      | 13  | VS GND   |  4  |
+| MISO     | 12  | VS POS   |  3  |
+| MOSI     | 11  | JOY COM  | 14  |
+| TFT CS   | 10  | JOY CTR  | 19  |
+| TFT D/C  |  8  | JOY UP   | 18  |
+| TFT RST  |  9  | JOY DN   | 15  |
+| TFT LITE |  5  | JOY LT   | 17  |
+| SD CS    |  6  | JOY RT   | 16  |
 
 ## Adafruit Pro Trinket
 
@@ -72,7 +94,18 @@ TODO more stuff here
   *  Interconnect board files: [board-protrinket](board-protrinket)
   *  Interconnect board purchase link: https://aisler.net/p/WMPMXXAI
 
-TODO more stuff here
+Pin mapping:
+
+| Function | Pin | Port | Function | Pin | Port |
+| -------- | --- | ---- | -------- | --- | ---- |
+| SCK      | 13  | PB5  | VS GND   |  4  | PD4  |
+| MISO     | 12  | PB4  | VS POS   |  3  | PD3  |
+| MOSI     | 11  | PB3  | JOY COM  | A0  | PC0  |
+| TFT CS   | 10  | PB2  | JOY CTR  | A1  | PC1  |
+| TFT D/C  |  8  | PB0  | JOY UP   | A2  | PC2  |
+| TFT RST  |  6  | PD6  | JOY DN   | A3  | PC3  |
+| TFT LITE |  9  | PB1  | JOY LT   | A4  | PC4  |
+| SD CS    |  5  | PD5  | JOY RT   | A5  | PC5  |
 
 ## Adafruit ItsyBitsy 32u4
 
@@ -81,7 +114,18 @@ TODO more stuff here
   *  Interconnect board files: [board-itsybitsy](board-itsybitsy)
   *  Interconnect board purchase link: https://aisler.net/p/JNFEJXOJ
 
-TODO more stuff here
+Pin mapping:
+
+| Function | Pin  | Port | Function | Pin  | Port |
+| -------- | ---- | ---- | -------- | ---- | ---- |
+| SCK      | SCK  | PB1  | VS GND   |  5   | PC6  |
+| MISO     | MISO | PB3  | VS POS   |  7   | PE6  |
+| MOSI     | MOSI | PB2  | JOY COM  | A0   | PF7  |
+| TFT CS   |  9   | PB5  | JOY CTR  | A1   | PF6  |
+| TFT D/C  | 11   | PB7  | JOY UP   | A2   | PF5  |
+| TFT RST  | 10   | PB6  | JOY DN   | A3   | PF4  |
+| TFT LITE | 13   | PC7  | JOY LT   | A4   | PF1  |
+| SD CS    | 12   | PD6  | JOY RT   | A5   | PF0  |
 
 ## Adafruit ItsyBitsy M0 Express
 
@@ -90,4 +134,15 @@ TODO more stuff here
   *  Interconnect board files: [board-itsybitsy](board-itsybitsy)
   *  Interconnect board purchase link: https://aisler.net/p/JNFEJXOJ
 
-TODO more stuff here
+Pin mapping:
+
+| Function | Pin  | Function | Pin  |
+| -------- | ---- | -------- | ---- |
+| SCK      | SCK  | VS GND   |  5   |
+| MISO     | MISO | VS POS   |  7   |
+| MOSI     | MOSI | JOY COM  | A0   |
+| TFT CS   |  9   | JOY CTR  | A1   |
+| TFT D/C  | 11   | JOY UP   | A2   |
+| TFT RST  | 10   | JOY DN   | A3   |
+| TFT LITE | 13   | JOY LT   | A4   |
+| SD CS    | 12   | JOY RT   | A5   |
